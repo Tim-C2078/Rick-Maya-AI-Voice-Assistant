@@ -51,6 +51,50 @@ from menu_mix_plu_mtd import send_text
 # ------------------------------------------------------------------
 CURRENT_VOICE_ID = None
 
+# Name fragments used to match installed voices (case-insensitive).
+# Based on your installed voice list.
+VOICE_KEYWORDS = {
+    # Male voices
+    "brian": ["brian"],
+    "geraint": ["geraint"],
+    "joey": ["joey"],
+    "russell": ["russell"],
+    "david": ["david"],
+    # Female voices
+    "emma": ["emma"],
+    "gwyneth": ["gwyneth"],
+    "ivy": ["ivy"],
+    "jennifer": ["jennifer"],
+    "kendra": ["kendra"],
+    "kimberly": ["kimberly"],
+    "nicole": ["nicole"],
+    "salli": ["salli"],
+    "amy": ["amy"],
+    "zira": ["zira"],
+    # High-level aliases
+    "male": ["brian", "geraint", "joey", "russell", "david", "male"],
+    "female": [
+        "emma",
+        "gwyneth",
+        "ivy",
+        "jennifer",
+        "kendra",
+        "kimberly",
+        "nicole",
+        "salli",
+        "amy",
+        "zira",
+        "female",
+    ],
+    # Persona names
+    "sentry": ["brian"],  # Sentry = British male
+    "maya": ["gwyneth"],  # Maya   = Welsh English female
+}
+
+# TTS tuning
+TTS_RATE = 150  # 150 is a natural pace for Ivona; 170 is a bit fast
+TTS_VOLUME = 1.0
+
 
 # ------------------------------------------------------------------
 # Speech
@@ -58,11 +102,14 @@ CURRENT_VOICE_ID = None
 def speak(audio):
     print(f"[SPEAKING] {audio}")
     engine = pyttsx3.init()
-    engine.setProperty("rate", 170)
+    engine.setProperty("rate", TTS_RATE)
+    engine.setProperty("volume", TTS_VOLUME)
 
     if CURRENT_VOICE_ID is not None:
         engine.setProperty("voice", CURRENT_VOICE_ID)
 
+    # Small lead-in pause helps Ivona voices avoid clipping the first syllable
+    time.sleep(0.15)
     engine.say(audio)
     engine.runAndWait()
     engine.stop()
@@ -70,21 +117,75 @@ def speak(audio):
     time.sleep(0.1)
 
 
-def getvoices(voice):
+def getvoices(voice, announce=True):
+    """Select a TTS voice by preference key.
+
+    If announce=True and the voice actually changes, speak a greeting.
+    If the voice is already active, stay silent.
+    """
     global CURRENT_VOICE_ID
+
     engine = pyttsx3.init()
     voices = engine.getProperty("voices")
     engine.stop()
     del engine
 
-    if voice == "male":
-        CURRENT_VOICE_ID = voices[0].id
-        print(f"[VOICE] Male selected: {CURRENT_VOICE_ID}")
-        speak("Hello, I am Sentry, your personal assistant.")
-    elif voice == "female":
-        CURRENT_VOICE_ID = voices[1].id
-        print(f"[VOICE] Female selected: {CURRENT_VOICE_ID}")
-        speak("Hello, I am Maya, your personal assistant.")
+    keywords = VOICE_KEYWORDS.get(voice, [voice])
+    matched = None
+
+    for kw in keywords:
+        for v in voices:
+            if kw.lower() in v.name.lower():
+                matched = v
+                break
+        if matched:
+            break
+
+    if not matched:
+        matched = voices[0]
+        print(f"[VOICE] No match for '{voice}', falling back to {matched.name}")
+
+    # If it's the same voice we're already using, do nothing (no greeting)
+    if matched.id == CURRENT_VOICE_ID:
+        print(f"[VOICE] Already using: {matched.name} (no change)")
+        return
+
+    CURRENT_VOICE_ID = matched.id
+    print(f"[VOICE] Selected: {matched.name}")
+    print(f"[VOICE] ID: {CURRENT_VOICE_ID}")
+
+    if announce:
+        if voice in ("male", "sentry", "brian", "geraint", "joey", "russell", "david"):
+            speak("Hello, I am Sentry, your personal assistant.")
+        else:
+            speak("Hello, I am Maya, your personal assistant.")
+
+
+def listvoices():
+    """Speak a short sample from every installed voice, one after another."""
+    engine = pyttsx3.init()
+    voices = engine.getProperty("voices")
+    engine.stop()
+    del engine
+
+    speak(f"I found {len(voices)} voices installed on this system.")
+
+    for i, v in enumerate(voices, start=1):
+        print(f"[VOICE {i}] {v.name}")
+        speak(f"Voice number {i}. {v.name}.")
+
+        engine = pyttsx3.init()
+        engine.setProperty("rate", TTS_RATE)
+        engine.setProperty("volume", TTS_VOLUME)
+        engine.setProperty("voice", v.id)
+        time.sleep(0.15)
+        engine.say(f"Hello master, this is voice number {i}.")
+        engine.runAndWait()
+        engine.stop()
+        del engine
+        time.sleep(0.2)
+
+    speak("That is all the voices I have available.")
 
 
 # ------------------------------------------------------------------
@@ -180,7 +281,7 @@ def takeCommand():
     return input("How may I assist you?\n")
 
 
-def takeCommandMic(phrase_limit=15, pause=1.5):
+def takeCommandMic(phrase_limit=15, pause=2.5):
     """
     Record from the mic.
       phrase_limit: max seconds of a single recording (default 15)
@@ -197,14 +298,12 @@ def takeCommandMic(phrase_limit=15, pause=1.5):
         except sr.WaitTimeoutError:
             print("[MIC] No speech detected within 10 seconds.")
             return "none"
-
     try:
         print("Recognizing....")
         query = r.recognize_google(audio, language="en-GH")
         print("You said:", query)
     except sr.UnknownValueError:
         print("[MIC] Could not understand audio.")
-        speak("Say that again master....")
         return "none"
     except sr.RequestError as e:
         print(f"[MIC] Google API error: {e}")
@@ -344,12 +443,33 @@ def cpu():
 # ------------------------------------------------------------------
 if __name__ == "__main__":
     wishme()
-    wakeword = "rick"
+
+    # Two wake words — each maps to a persona voice
+    WAKE_WORDS = {
+        "rick": "male",  # "rick ..."  -> Sentry (male voice)
+        "maya": "female",  # "maya ..."  -> Maya   (female voice)
+    }
+
+    # Default voice on startup
+    getvoices("male")
+
     while True:
         query = takeCommandMic(phrase_limit=5, pause=0.8).lower()
         query = word_tokenize(query)
         print(query)
-        if wakeword in query:
+
+        # --- Detect wake word + auto-switch persona voice ---
+        detected_wakeword = None
+        for ww in WAKE_WORDS:
+            if ww in query:
+                detected_wakeword = ww
+                break
+
+        if detected_wakeword:
+            # Switch voice to match the wake word's persona
+            getvoices(WAKE_WORDS[detected_wakeword])
+
+            # -------------------- Commands --------------------
             if "time" in query:
                 tell_time()
 
@@ -368,18 +488,55 @@ if __name__ == "__main__":
             elif any(w in query for w in ["feeling", "emotions"]):
                 checkemotions()
 
+            elif "list" in query and "voice" in query:
+                listvoices()
+
             elif "voice" in query:
-                if "male" in query:
+                if (
+                    "geraint" in query
+                    or "male" in query
+                    or "sentry" in query
+                    or "brian" in query
+                ):
                     getvoices("male")
-                elif "female" in query:
+                elif (
+                    "gwyneth" in query
+                    or "female" in query
+                    or "maya" in query
+                    or "emma" in query
+                ):
                     getvoices("female")
+                elif "zira" in query:
+                    getvoices("zira")
+                elif "david" in query:
+                    getvoices("david")
+                else:
+                    speak(
+                        "Which voice would you like? Say male, female, Geraint, or Gwyneth."
+                    )
+                    choice = takeCommandMic(phrase_limit=5, pause=1.5).lower().strip()
+                    if not choice:
+                        speak("I did not catch that.")
+                    elif any(
+                        w in choice for w in ["geraint", "male", "sentry", "brian"]
+                    ):
+                        getvoices("male")
+                    elif any(
+                        w in choice for w in ["gwyneth", "female", "maya", "emma"]
+                    ):
+                        getvoices("female")
+                    elif "zira" in choice:
+                        getvoices("zira")
+                    elif "david" in choice:
+                        getvoices("david")
+                    else:
+                        speak("Sorry, I do not have that voice installed.")
 
             elif "email" in query:
                 try:
                     speak("Who is the recipient?")
                     name = takeCommandMic(phrase_limit=10, pause=1.5).lower().strip()
 
-                    # Check if the contact exists in the contacts dictionary
                     recipient = contacts.get(name)
 
                     if not recipient:
@@ -403,7 +560,6 @@ if __name__ == "__main__":
                     speak("Who is the recipient?")
                     name = takeCommandMic(phrase_limit=10, pause=1.5).lower().strip()
 
-                    # Check if the username exists in the username dictionary
                     phone_no = username.get(name)
 
                     if not phone_no:
@@ -502,13 +658,11 @@ if __name__ == "__main__":
                 end_range = takeCommandMic(phrase_limit=10, pause=1.5).lower().strip()
                 speak("Processing request master")
 
-                # Convert the dates
                 day1, day2, month1, month2, year1, year2 = sales_report(
                     start_range, end_range
                 )
                 print(start_range, end_range)
 
-                # Start the Playwright automation
                 playwright_web_interaction_base(
                     sales_report_automate,
                     "msedge",
@@ -550,7 +704,6 @@ if __name__ == "__main__":
 
                 print(start_range, end_range)
 
-                # Start the Playwright automation
                 playwright_web_interaction_base1(
                     send_text3,
                     "msedge",
@@ -598,7 +751,6 @@ if __name__ == "__main__":
 
                 print(start_range, end_range)
 
-                # Start the Playwright automation
                 playwright_web_interaction_base1(
                     send_text4,
                     "msedge",
