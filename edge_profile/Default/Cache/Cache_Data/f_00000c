@@ -1,0 +1,490 @@
+var MW_Selector;
+var mw_next_uid = 0;
+var mw_holding = [];
+var mw_holdingdesc = [];
+var mw_quickselect = ['RSA','RAND'];
+
+var mw_scrolling = false;
+
+		 function populateQuick(arr, ParamID, ParamType)		 
+		  {
+		      if (ParamID == "Select Department StockCodes" || ParamType == "7") {      //M TITUS ADDED
+		          $("#mw_quick").empty();                                               //M TITUS ADDED
+		          $("#mw_quick").append("<option value='NOTHING'>Nothing</option>");    //M TITUS ADDED
+		          $("#mw_quick").append("<option value='All'>All</option>");            //M TITUS ADDED
+		      }                                                                         //M TITUS ADDED
+		      else if (ParamType == "8")   //ALL OTHER DROPDOWNS (SINGLE SELECT)        //M TITUS ADDED
+                {                                                                       //M TITUS ADDED
+		            $("#mw_quick").empty();                                             //M TITUS ADDED
+		        }                                                                       //M TITUS ADDED
+		      else {
+		          $("#mw_quick").empty();
+		          $("#mw_quick").append("<option value='NOTHING'>Nothing</option>");
+		          $("#mw_quick").append("<option value='All'>All</option>");
+		          $("#mw_quick").append("<option value='RSA'>RSA</option>");
+		          $("#mw_quick").append("<option value='RAND'>RAND</option>");
+		      }
+			arr.sort(SortByName);
+			$(arr).each( function () { if (this != 'RSA' && this != 'RAND') {$("#mw_quick").append("<option value='"+ this + "'>"+this+"</option>"); }} );				
+		   }
+function SortByName(a, b){
+  var aName = a;
+  var bName = b; 
+   var res = ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
+   return res;
+}
+
+(function ($, window, document) {
+    MW_Selector = function (title, parentparams, multiselect, dataid, success, dashboardid, paramtype) {
+        var original = this;
+			
+        mw_next_uid += 1;
+        var tid = mw_next_uid;
+        var dialog_back = "mw_back_" + tid; var dialog_backh = "#" + dialog_back;
+        var dialog_selection = "mw_sel_" + tid; var dialog_selectionh = "#" + dialog_selection;
+        var maindiv = "mw_" + tid; var maindivh = '#' + maindiv;
+        var showselection = "mw_showselection_" + tid; var showselectionh = '#' + showselection;
+
+        var buttonbar = "mw_buttonbar_" + tid; var buttonbarh = '#' + buttonbar;
+        var buttonok = "mw_buttonok_" + tid; var buttonokh = '#' + buttonok;
+        var buttoncancel = "mw_buttoncancel_" + tid; var buttoncancelh = '#' + buttoncancel;
+
+        var thisselector = [];
+        var oldthisselector = [];
+        var olddesc = [];		
+        var tbl = "mw_tbl_" + tid; var tblh = "#" + tbl;
+		var preparedparams = "";
+         
+
+		
+		function addQuickSelect(id)
+		{
+		 var res = 0;
+		 var nid = (id + "").split(",");		
+		  $(nid).each(function ()
+		   {
+		    var item = this + "";			
+			 if (!(item == ""))
+			 {		     
+			 var idx = mw_quickselect.indexOf(item);			            
+             if (idx == -1) { mw_quickselect.push(item); res = 1 }			 
+			 }
+		    }
+			);
+			return res;
+		}
+		
+		function prepareparams() {
+          var paramxml = "<params>"		;
+		      var err = "";
+		 if (parentparams != "") {
+		    var paramlist = [];
+            paramlist = parentparams.split(",");			
+			  $(paramlist).each( function () {
+              if (dashboardid > -1) { 
+              var tobj = $("#input_"+this+"_"+dashboardid);
+              }
+               else { 
+              var tobj = $("#input_"+this);
+              } 
+			     
+			           if (tobj != undefined) 
+					    { 
+                          if (tobj.val() == undefined)
+                           {
+                            if ((tobj.attr("val") != undefined) && (tobj.attr("val") != ""))
+                             {
+                              paramxml = paramxml + "<gaapparam><name>"+tobj.attr("name")+"</name><value>"+tobj.attr("val")+"</value></gaapparam>";
+                             }
+                             else
+                              { 
+                               err = "ERR: Parameter ["+this+"] is not available. Please contact GAAP";
+                                }                            
+                            }
+                             else 
+                              {
+                                if (tobj.val() != "")
+                                 {
+                                  paramxml = paramxml + "<gaapparam><name>"+tobj.attr("name")+"</name><value>"+tobj.val()+"</value></gaapparam>"; 
+                                 }   
+                                  else 
+                                   {
+                                    err = "ERR: Parameter ["+this+"] is not available. Please contact GAAP";
+                                    }
+                                   
+                               }						  
+						 }
+						 else
+						  {
+                           if (tobj == undefined) {
+                            err = "ERR: Parameter ["+this+"] is not available. Please contact GAAP";
+                            }
+                             else
+						      {err = "ERR: Necessary Parameter Missing - " + tobj.attr("hint")}
+						   return false;}			       
+			   }  );
+			  if (err != "") {
+			      return err;
+			   }
+			    else
+				 {
+				  paramxml = paramxml + "</params>";
+				  return paramxml;
+				   }			   
+			 }
+			 else
+			  {
+			   return "<params/>"
+			  }
+		 }
+
+        function addtolist(id, name) {
+            var idx = thisselector.indexOf(id);
+            if (idx != -1) { thisselector.splice(idx, 1); }
+            thisselector.push(id);
+        }
+
+        function removefromlist(id, name) {
+            var idx = thisselector.indexOf(id);
+            if (idx != -1) { thisselector.splice(idx, 1); }
+        }
+
+           if (parentparams != "") {
+             var p = parentparams.split(",");
+             $(original).attr('disabled', 'disabled');
+             $(p).each( function () {
+              
+               if (dashboardid > -1) {var tbitem = $("#input_"+this+"_"+dashboardid);} else {var tbitem = $("#input_"+this);}
+                
+
+               tbitem.bind("ichanged", function () { mw_holding[maindiv] = []; 
+                                                      mw_holdingdesc[maindiv] = []; 
+                                                      $(maindivh).text(title);
+                                                      $(maindivh).removeClass("itemsselected"); 
+                                                      $(original).removeClass("paramcomplete");
+                                                      $(original).removeAttr('disabled'); 
+                                                     });              
+             });
+            }
+         
+		 
+        function mw_getdescriptions(id) {
+            var s = "";
+            if (!($(mw_holdingdesc[id]).length == 0)) {
+                var isel = mw_holdingdesc[id];
+                var ic = 0;
+                $(isel).each(
+	         function (k, v) {
+	             ic += 1;
+	             if (ic < 25) {
+	                 s = s + v + "<br>";
+	             }
+	             else if (ic == 25) {
+	                 s = s + "... and more<br>";
+	             }
+	         }
+			 );
+            }
+            else
+            { s = "Nothing has been selected yet!<br>"; }
+            return s;
+
+        }
+
+        if ($('#mw_hint').length == 0) {
+            $('body', document).append('<div id="mw_hint" class="mw_hint" >Hello</div>');
+        }
+
+
+        // $(original).hover( function (e) { var tx = e.pageX+10; var ty = e.pageY +10; $('#mw_hint').css({left:tx, top:ty}); $('#mw_hint').html(""); var listitems = mw_getdescriptions(maindiv); $('#mw_hint').html(listitems); $("#mw_hint").fadeIn(500); }, function (e) { $('#mw_hint').html(""); $('#mw_hint').fadeOut(100); } );		 
+        //$(original).mousemove( function (e) {var tx = e.pageX+10; var ty = e.pageY +10; $('#mw_hint').css({left:tx, top:ty}); } )
+        $(original).append('<table class="mw_tblheader "><tr><td><div id="' + maindiv + '" class="mw_title">' + title + '</div></td><td width=28px><div id="' + showselection + '" class="mw_showselection"></div></td></tr></table>');
+
+        $(showselectionh).bind('click', function (e) {
+            if ($(original).attr('disabled') != undefined) { return false} 
+            var tx = e.pageX - 310;
+            var ty = e.pageY - 10;
+            $('#mw_hint').css({ left: tx, top: ty });
+            $('#mw_hint').html("");
+            var listitems = mw_getdescriptions(maindiv);
+            $('#mw_hint').html(listitems);
+            $("#mw_hint").fadeIn(500);
+            window.setTimeout(function () { $("#mw_hint").fadeOut(100); }, 5000);
+        }
+		  );
+		  
+		 function quickSelect(sel)
+           {
+
+		        $(tblh + " tbody tr").each( function()
+				 {		
+					var j = $('#'+tbl).dataTable().fnGetData(this); 				    
+					if (sel == 'Nothing')
+					 {
+					   $(this).removeClass("selected"); removefromlist(j[0]);
+					 }
+					 else
+					  if (sel == 'All')
+					   {
+					   if (j[2] != 1) { addtolist(j[0]); $(this).addClass("selected"); }
+					   }
+					   else
+					 {				  
+				  if ((j[4]).split(',').indexOf(sel) >= 0) { 
+                      if (j[2] != 1) { addtolist(j[0]); $(this).addClass("selected"); }
+   				  }
+				   else
+				    {
+						$(this).removeClass("selected"); removefromlist(j[0]);					 
+					 }
+					}
+				 }				 
+				 );
+				
+		        //var trs = $(tblh).fnGetNodes(); 
+					/*$(trs).each(function () { var j = tmp.fnGetData(this); $(this).removeClass("selected"); removefromlist(j[0]); } );                                   
+                      } 
+                            var adata = tmp.fnGetData(this); 							
+							if ((adata[2] == 1) && (multiselect == true)) {
+                                var selgroup = adata[3]; if ($(this).hasClass("selected") == true) { var doselect = false; } else { var doselect = true; };
+                                $(tblh + " tbody tr").each(function () {
+                                    var j = tmp.fnGetData(this); if (j[3] == selgroup) {
+                                        if (doselect == true) {
+                                            if (j[2] != 1) { addtolist(j[0]); }
+                                            $(this).addClass("selected");
+                                        }
+                                        else {
+                                            removefromlist(j[0]);
+                                            $(this).removeClass("selected");
+                                        }
+                                    }
+                          */
+					 }		   
+
+        $("#" + maindiv).bind('click', function () {
+
+            /* if ($(original).attr('selector') !== undefined) 
+            {
+            var oldsel = "" + $(original).attr('selector');	 
+            thisselector = oldsel.split(',');}*/
+
+             if ($(original).attr('disabled') != undefined) { return false} 
+             preparedparams = prepareparams();
+             if (preparedparams.substring(0,3) == "ERR") {
+             alert(preparedparams);
+              return false;
+              }
+            if (!(mw_holding[maindiv] == undefined)) {
+                thisselector = jQuery.makeArray(mw_holding[maindiv][0]);
+                oldthisselector = jQuery.makeArray(mw_holding[maindiv][0]);
+				 if (!(mw_holdingdesc[maindiv] == undefined)) { 
+                olddesc = jQuery.makeArray(mw_holdingdesc[maindiv][0]);}
+            }
+
+            $('body', document).append('<div id="' + dialog_back + '" class="mw_dialogback"></div>');
+            $('body', document).append('<div id="' + dialog_selection + '" class="mw_selection" style="z-index:99999"></div>');
+            $(dialog_selectionh).append('<div class="mw_selectiontitle">' + title + '</div>');
+            $(dialog_selectionh).append('<div class="mw_quickbar"></div>');
+            $(dialog_selectionh).append('<table class="mw_table" id="' + tbl + '"></table>');
+         
+            $(tblh).append('<thead style="display:none"><tr><th>id</th><th>Name</th><th>IsGroup</th><th>Group</th><th>attribs</th></tr></thead>');
+            //$(tblh).append('<tbody><tr class="groupheader"><td>Group-1</td><td>Group 1</td><td>1</td><td>1</td></tr><tr><td>Node-1</td><td>Branch 1</td><td>0</td><td>1</td></tr><tr><td>Node-2</td><td>Branch 2</td><td>0</td><td>1</td></tr><tr><td>Node-3</td><td>Branch 3</td><td>0</td><td>1</td></tr><tr class="groupheader"><td>Group-2</td><td>Group 2</td><td>1</td><td>2</td></tr><tr><td>Node-4</td><td>Branch 4</td><td>0</td><td>2</td></tr><tr><td>Node-5</td><td>Branch 5</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 6</td><td>0</td><td>2</td></tr><tr><td>Node-6</td><td>Branch 7</td><td>0</td><td>2</td></tr></tbody>');						
+            $(dialog_selectionh).append('<div id="' + buttonbar + '" class="mw_buttonbar"></div>');
+            $(buttonbarh).append('<div id="' + buttonok + '" class="mw_buttonok"><div style="position:absolute; width:100%; text-align:center; height:24px; top:50%; margin-top:-12px;">OK</div></div');
+            $(buttonbarh).append('<div id="' + buttoncancel + '" class="mw_buttoncancel"><div style="position:absolute; width:100%; text-align:center; height:24px; top:50%; margin-top:-12px;">Cancel</div></div');            							
+			
+			if (multiselect == true)
+			{
+			 $('.mw_quickbar').append('<select id="mw_quick" class="mw_quick"></select>');			
+             $('.mw_quickbar').append('<span id="mw_quicklbl" class="mw_quicklbl">Quick Select</span>');			
+			 
+			 //used to by (buttonbarh)
+             //M TITUS ADDED
+             if (title == "Select Department StockCodes" || paramtype == "7")
+             {
+                $("#mw_quick").empty();
+                mw_quickselect = ['',''];
+             }
+             else
+             {
+                $("#mw_quick").empty();
+                mw_quickselect = ['RSA','RAND'];
+             }
+
+             populateQuick(mw_quickselect, title, paramtype);
+
+             $("#mw_quick").change( function() { $("#mw_quick option:selected").each( function() { quickSelect($(this).text()); }) } );
+			}
+            var totalh = $(dialog_selectionh).height();
+//            var mw_selectiontitle =  $(".mw_selectiontitle")[0].height(); 
+//            var quickbarh = $(".mw_quickbar").height();                //MTITUS ADDED
+//            var dataTables_filterh = $(".dataTables_filter").height(); //MTITUS ADDED
+            
+            var mw_filtersearchH =  $(".mw_filtersearch").height();
+            if (mw_filtersearchH == undefined) mw_filtersearchH = 44; 
+
+            var diffh = $(buttonbarh).height() + $(".mw_selectiontitle").height() + $(".mw_quickbar").height() + mw_filtersearchH; 
+
+            var tableh = (totalh-diffh-2);  //MTITUS FIX Hidden Items                                  
+
+
+            var ua = navigator.userAgent,
+								event = (ua.match(/iPad/i)) ? "click" : "click";
+            
+            var tmp = $(tblh).dataTable({ "bSort": false, "sDom": "<'mw_filtersearch'f>t",
+                "oLanguage": { "sSearch": "Filter Selection" },
+                "bScrollCollapse": true,
+                "bScrollInfinite": true,
+                "sScrollY": tableh,
+                "iDisplayLength": 9999,                
+                "bServerside": false, 
+                "bProcessing": false,
+                "sAjaxSource": "/members/data.ashx",
+                "fnServerParams": function (aoData) { aoData.push({ "name": "datasourceid", "value": dataid }, {"name": "params", "value": preparedparams }); },
+                "fnRowCallback": function (nrow, adata) {
+				    if (multiselect == true) {
+				    if (addQuickSelect(adata[4]) == 1) {
+					populateQuick(mw_quickselect, dataid, paramtype);} }
+					
+                    if (adata[2] == 1) { $(nrow).addClass("groupheader"); }
+                    $(thisselector).each(function (i, j) { if (adata[0] == j) { $(nrow).addClass("selected"); } });
+                    var mw_moving = false;
+//                    if (ua.match(/iPad/i)) {
+//                        $(nrow).unbind('touchmove');
+//                        $(nrow).bind('touchmove', function () { mw_moving = true; });
+//                    }
+//                    else { mw_moving = false; }                    
+                    $(nrow).unbind(event);
+                    $(nrow).bind(event, function (e) {                         
+                        if (mw_moving != true) {
+                              if (multiselect == false) { 
+                                   var trs = tmp.fnGetNodes(); 
+                                   $(trs).each(function () { var j = tmp.fnGetData(this); $(this).removeClass("selected"); removefromlist(j[0]); } );                                   
+                                  } 
+                            var adata = tmp.fnGetData(this); if ((adata[2] == 1) && (multiselect == true)) {
+                                var selgroup = adata[3]; if ($(this).hasClass("selected") == true) { var doselect = false; } else { var doselect = true; };
+                                $(tblh + " tbody tr").each(function () {
+                                    var j = tmp.fnGetData(this); if (j[3] == selgroup) {
+                                        if (doselect == true) {
+                                            if (j[2] != 1) { addtolist(j[0]); }
+                                            $(this).addClass("selected");
+                                        }
+                                        else {
+                                            removefromlist(j[0]);
+                                            $(this).removeClass("selected");
+                                        }
+                                    }
+                                });
+                            }
+                            if (adata[2] == 0) { if ($(this).hasClass("selected") == true) { $(this).removeClass("selected"); removefromlist(adata[0]); } else { $(this).addClass("selected"); addtolist(adata[0]); } }
+                        } else { mw_moving = false } 
+                      return false;
+                    });
+                    return nrow;
+                },
+                "aoColumnDefs": [{ "aTargets": [0], "bVisible": false },
+											                  { "aTargets": [1], "bVisible": true },
+															  { "aTargets": [2], "bVisible": false },
+															  { "aTargets": [3], "bVisible": false},
+															  { "aTargets": [4], "bVisible": false}
+															  ]
+            });
+
+
+            /*$(tblh+" tbody tr").bind(event, function () { alert("well well"); if (mw_moving != true) {var adata = tmp.fnGetData(this); if (adata[2] == 1) { var selgroup = adata[3].text; if ($(this).hasClass("selected") == true) { var doselect = false;} else {var doselect = true;};
+            $(tblh+" tbody tr").each( function () { var j = tmp.fnGetData(this); if (j[3] == selgroup ) {
+            if (doselect == true) {  if (j[2] != 1) { addtolist(j[0]); }
+            $(this).addClass("selected");
+            }
+            else 
+            {
+            removefromlist(j[0]);
+            $(this).removeClass("selected");}																																				    																																				 
+            } } ); 																																				 
+            }  
+            if (adata[2] == 0) { if ($(this).hasClass("selected") == true) { $(this).removeClass("selected"); removefromlist(adata[0]); } else { $(this).addClass("selected"); addtolist(adata[0]); } }															                                                 																					
+            } else { mw_moving = false } });																  */
+            
+            $(buttonokh).bind(event, function () {
+                //$(original).attr('selector',thisselector);							 
+                mw_holding[maindiv] = [];
+                mw_holding[maindiv].push(thisselector);
+                mw_holdingdesc[maindiv] = [];
+                $(tblh + " tbody tr").each(function () {
+                    if ($(this).hasClass("selected") == true) {
+                        var adata = tmp.fnGetData(this);
+                        if (adata[2] == 0) {
+                            mw_holdingdesc[maindiv].push($(this).text());
+                        }
+                    }
+                });
+                $(maindivh).val(thisselector);
+				$(original).val(thisselector);
+                if ($(thisselector).length > 1) {
+                    $(maindivh).text(mw_holdingdesc[maindiv][0] + ' ...');
+                    $(maindivh).addClass("itemsselected");
+					$(original).addClass("paramcomplete");
+                }
+                else if ($(thisselector).length == 0) {
+                    $(maindivh).removeClass("itemsselected");
+					$(original).removeClass("paramcomplete");
+                    $(maindivh).text(title);
+                }
+                else {
+                    $(maindivh).text(mw_holdingdesc[maindiv][0]);
+                    $(maindivh).addClass("itemsselected");
+					$(original).addClass("paramcomplete");
+                }
+                $(dialog_backh).remove();
+                $(dialog_selectionh).remove();
+                $(original).trigger("ichanged");                 
+                if (success != undefined) 
+                { 
+                    var arrParams = $('.param', '#db_' + dashboardid + '_params');          /* MFT NEW NAV  */
+                    var arrCount = $(".paramcomplete", '#db_' + dashboardid + '_params');   /* MFT NEW NAV  */
+                    if (arrParams.length == arrCount.length)                                /* MFT NEW NAV  */
+                    {                                                                       /* MFT NEW NAV  */        
+                        refreshDashboard( dashboardid, true);                               /* MFT NEW NAV  */
+                    }                                                                       /* MFT NEW NAV  */
+                    success (this);                                                
+                }
+            });
+
+            $(buttoncancelh).bind(event, function () {
+                mw_holding[maindiv] = [];
+                thisselector = oldthisselector;
+                mw_holding[maindiv].push(thisselector);                
+
+                if ($(thisselector).length > 1) {
+                    if (olddesc[0] != undefined)
+                    {$(maindivh).text(olddesc[0] + ' ...');} else {$(maindivh).text(title);}
+                    $(maindivh).addClass("itemsselected");
+			    	$(original).addClass("paramcomplete");
+                }
+                else if ($(thisselector).length == 0) {
+                    $(maindivh).removeClass("itemsselected");
+					$(original).removeClass("paramcomplete");
+                    $(maindivh).text(title);
+                }
+                else {
+                    if (olddesc[0] != undefined)
+                    {$(maindivh).text(olddesc[0] + ' ...');} else {$(maindivh).text(title);}                    
+                    $(maindivh).addClass("itemsselected");
+					$(original).addClass("paramcomplete");
+                }
+
+                $(dialog_backh).remove();
+                $(dialog_selectionh).remove();
+            });
+        }
+	                 );
+    }
+
+    $.fn.mw_selector = MW_Selector;
+    $.fn.MW_selector = MW_Selector;
+    $.fn.MW_Selector = MW_Selector;
+}
+
+(jQuery, window, document)) 
+
+ 

@@ -1,0 +1,748 @@
+﻿// JScript File
+
+if (!String.format) {
+    String.format = function (format) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return format.replace(/{(\d+)}/g, function (match, number) {
+            return args[number] !== undefined
+				? args[number]
+				: match;
+        });
+    };
+}
+
+// Catches the enter key press and replaces it with a tab unless the focus is on a button
+ function catchEnter() {
+    if (event.keyCode==13) {
+	    if (document.activeElement.type != 'submit') {
+		    event.keyCode=9;
+		}
+	    return event.keyCode;
+    }
+}
+
+
+//Set the focus to the specified control
+function setFocus(control) {
+		document.getElementById(control).focus();
+		return true;
+}
+
+function SessionTimeout() {
+    MxSessionTimer.redirectToLogout();
+}
+
+//Find an element even if in a master page. This function should eventually become obsolete as control names should not be hard coded
+function mxGetElementById(objName) {
+    if (document.getElementById(objName) == undefined) {
+        return document.getElementById('_ctl0_ph_'+objName);
+    } else {
+        return document.getElementById(objName);
+    }
+}
+
+function toggleCheckboxLabel(cb, updateLabelClass) {
+    // wrap in a try/catch for IE 7 which does not support label selector
+    try {
+        var cbLabel = $("label[for='" + cb.id + "'");
+        if (cbLabel != undefined && cbLabel.length == 1) {
+            if (cb.checked == false) {
+                if (updateLabelClass) {
+                    cbLabel.removeClass('rfdCheckboxChecked');
+                    cbLabel.addClass('rfdCheckboxUnchecked');
+                }
+            } else {
+                if (updateLabelClass) {
+                    cbLabel.removeClass('rfdCheckboxUnchecked');
+                    cbLabel.addClass('rfdCheckboxChecked');
+                }
+            }
+        }
+    }
+    catch (e) { }
+}
+
+// Select/deselect all item's checkboxes in a datagrid when the parent checkbox is checked/unchecked
+// Select/deselect the parent checkbox when all item's checkboxes in the grid is checked/unchecked
+function select_deselectAll(chkVal, thisChbId, datagridId, headerChbId, itemChbId, performUpdate, removeLabelClass) {
+
+	// Note:
+    // - IMPORTANT: Preconditions :
+    //      + headerChbId string and itemChbId string must NOT be a subset of each other
+    //      + if there are multiple grids on the page, headerChbId and itemChbId for each grid must be unique
+	// - performUpdate: is a true/false param.
+	//   If true, javascript function update(chbObj, datagridId) will be called to do extra stuff.
+    //   This update function needs to be implemented.
+
+    // Added Optional Parameter to remove class from checkbox label as it doesn't work in IE9 + IE10 in RadGrid
+    removeLabelClass = removeLabelClass || false;
+
+	var frm = document.forms[0];
+	var allItemsChecked = true;
+	var chbSelectAll = null;
+    var cbLabel;
+
+	// Loop through all elements
+	for (i=0; i<frm.length; i++)
+	{
+		// Look for our Header Template's Checkbox
+		if (thisChbId.indexOf (headerChbId) != -1)
+		{
+			// Check if main checkbox is checked, then select or deselect datagrid checkboxes
+			if (frm.elements[i].id.indexOf (itemChbId) != -1)
+			{
+			    // if header is checked
+				if(chkVal == true)
+				{
+				    frm.elements[i].checked = frm.elements[i].disabled ? frm.elements[i].checked : true;
+				    toggleCheckboxLabel(frm.elements[i], removeLabelClass);
+
+					if (frm.elements[i].id.indexOf (datagridId) != -1 & !frm.elements[i].disabled)
+					{
+						var chb1 = document.getElementById(frm.elements[i].id);
+						if(performUpdate)
+						{
+							update(chb1, datagridId);
+						}
+					}
+				}
+				else
+				{
+				    frm.elements[i].checked = frm.elements[i].disabled ? frm.elements[i].checked : false;
+				    toggleCheckboxLabel(frm.elements[i], removeLabelClass);
+				}
+			}
+		}
+		else if (thisChbId.indexOf (itemChbId) != -1)
+		{
+			// Check if any of the checkboxes are not checked, and then uncheck top select all checkbox
+			if (chkVal == false)
+			{
+				if (frm.elements[i].id.indexOf (headerChbId) != -1 && frm[i].checked == true)
+				{
+				    frm.elements[i].checked = false; //Uncheck main select all checkbox
+				    toggleCheckboxLabel(frm.elements[i], removeLabelClass);
+				}
+			}
+			else
+			{
+				if (frm.elements[i].id.indexOf (headerChbId) != -1)
+				{
+					chbSelectAll = frm.elements[i];
+				}
+			}
+
+			// Check if all child items are checked
+			if (frm.elements[i].id.indexOf (itemChbId) != -1)
+			{
+				allItemsChecked = allItemsChecked & (frm.elements[i].checked || (frm.elements[i].disabled));
+			}
+		}
+	}
+
+	if ((thisChbId.indexOf (itemChbId) != -1) & (chkVal == true) & (thisChbId.indexOf (datagridId) != -1) & !(document.getElementById(thisChbId).disabled))
+	{
+		// Update confirm tick and invoice amount
+		var chb1 = document.getElementById(thisChbId);
+		if(performUpdate)
+		{
+		    update(chb1, datagridId);
+		}
+	}
+
+	if (chbSelectAll != null)
+	{
+	    chbSelectAll.checked = allItemsChecked;
+	    toggleCheckboxLabel(chbSelectAll, removeLabelClass);
+	}
+}
+
+//Used to check/deselect all checkboxes in a datalist
+//isChecked is checked value
+//checkBoxFieldName is the name of the checkbox in the datalist
+//make sure that the checkBoxFieldName is unique in the page and that it is not a subset of anything else
+    function CheckAll(isChecked, checkBoxFieldName) {
+        var frm = document.forms[0];
+        for (i = 0; i < frm.length; i++) {
+            e = frm.elements[i];
+            if (e.type == 'checkbox' && e.name.indexOf(checkBoxFieldName) != -1)
+                if (e.checked !== isChecked) {
+                    e.click();
+                    e.checked = isChecked;  // left in place to ensure there are no issues with other browsers
+                }
+        }
+    }
+
+// The following 2 functions are used in the email text box
+
+var multiEmailfilter=/^\w+[\+\.\w-]*@([\w-]+\.)*\w+[\w-]*\.([a-z]{2,4}|\d+)(\s*,\s*\w+[\+\.\w-]*@([\w-]+\.)*\w+[\w-]*\.([a-z]{2,4}|\d+))*$/i;
+var blankfilter=/^\s*$/i;
+var oldValue='';
+var selectedTextBoxId = '';
+function validateEmailAddressFromRadTextBox(sender, args) {
+    oldValue = '';
+    var radTextBox = sender;
+    var isBlank = blankfilter.test(radTextBox.get_value());
+    if (!isBlank) {
+        radTextBox.set_value(radTextBox.get_value().replace(/[(\s*;\s*)(\s*,\s*)]+/, ","));
+        var returnval = multiEmailfilter.test(radTextBox.get_value());
+		if (!returnval) {
+		    oldValue = radTextBox.get_value();
+			radTextBox.set_value('');
+		}
+    }
+    selectedTextBoxId = radTextBox.ClientID;
+}
+
+function selectTextFromRadTextBox(sender, args) {
+    var radTextBox = sender;
+    if (radTextBox.ClientID == selectedTextBoxId) {
+        if (oldValue != '') {
+            radTextBox.set_value(oldValue);
+        }
+    }
+    radTextBox.selectAllText();
+}
+
+ // Function returns boolean as to whether one checkbox in a RadGrid has been selected
+ // See WIKI for usage requirements
+ // NB. The radGrid must have EnableClientKeyValues="true" in the ClientSettings tag (again see WIKI)
+function AtLeastOneCheckBoxChecked(radGridClientSideID, checkBoxColName) {
+     var radGrid = window[radGridClientSideID];
+     var radGridMasterTable = radGrid.MasterTableView;
+     var radGridRows = radGridMasterTable.Rows;
+     var row, checkBox;
+     var checkBoxChecked;
+
+     for (i = 0; i < radGridRows.length; i++) {
+         row = radGridRows[i];
+
+         // Ensure that only one INPUT element (checkbox) exists
+         // Ensure that there is no TABLE element (to remove sub-ordinates)
+         var cell = radGridMasterTable.GetCellByColumnUniqueName(row, checkBoxColName);
+         if (cell.getElementsByTagName("INPUT").length == 1 && cell.getElementsByTagName("TABLE").length == 0 ) {
+             checkBoxChecked = cell.getElementsByTagName("INPUT")(0).checked;
+             if (checkBoxChecked) return true;
+         }
+
+     }
+     return false;
+}
+
+function AtLeastOneCheckBoxChecked2(radGridClientSideID, checkBoxName) {
+    var returnValue = false;
+    var grid = $find(radGridClientSideID);
+    if (grid) {
+        var radGridMasterTable = grid.get_masterTableView();
+        var radGridRows = radGridMasterTable.get_dataItems();
+
+        for (i = 0; i < radGridRows.length; i++) {
+            var cb = radGridRows[i].findElement(checkBoxName);
+            if (cb != null && cb.checked == true) {
+                returnValue = true;
+            }
+        }
+    }
+
+    return returnValue;
+}
+
+
+
+// TODO: April: Fix this ---- Please don't use following functions
+// Tick check box utilities
+
+function tickCheckBoxWithSameParent(obj, objId, chbId, value) {
+    //var id = obj.id.replace(objId, chbId);
+    var id = obj.id.substring(0, obj.id.indexOf(objId)) + chbId;
+    tickBox(id, value);
+}
+
+function tickBox(id, value) {
+    var chb = document.getElementById(id);
+    if (chb != null) {
+        chb.checked = value;
+    }
+}
+
+
+
+// TODO: April :Fix this
+
+
+function triggerTickCheckBox(obj,val) {
+
+    if (obj.id.indexOf("CountSelector") != -1) {
+        tickCheckBoxWithSameParent(obj, "CountSelector", "ChbSelect" + val + "Count", true);
+    }
+    else if (obj.id.indexOf("PickerUomReportingUnit") != -1) {
+    tickCheckBoxWithSameParent(obj, "PickerUomReportingUnit", "ChbSelectReportingUnit", true);
+    }
+    else if (obj.id.indexOf("PickerUomStocktakeBoxUnit") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerUomStocktakeBoxUnit", "ChbSelectStocktakeUnit1", true);
+    }
+    else if (obj.id.indexOf("PickerUomStocktakeInnerUnit") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerUomStocktakeInnerUnit", "ChbSelectStocktakeUnit2", true);
+    }
+    else if (obj.id.indexOf("PickerUomStocktakeUnit4") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerUomStocktakeUnit4", "ChbSelectStocktakeUnit4", true);
+    }
+    else if (obj.id.indexOf("PickerVendorUomStockCountUnit") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerVendorUomStockCountUnit", "ChbSelectVendorStockCountUnit", true);
+    }
+    else if (obj.id.indexOf("PickerVendorUomPurchaseUnit") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerVendorUomPurchaseUnit", "ChbSelectVendorPurchaseUnit", true);
+    }
+    else if (obj.id.indexOf("OrderRatioPanel") != -1) {
+        tickCheckBoxWithSameParent(obj, "OrderRatioPanel", "ChbSelectOrderRatio", true);
+    }
+    else if (obj.id.indexOf("OrderCategoryPickerOpener1") != -1) {
+        tickCheckBoxWithSameParent(obj, "OrderCategoryPickerOpener1", "ChbSelectOrderCategoryID", true);
+    }
+    else if (obj.id.indexOf("PickerVendorUomReceiveUnit") != -1) {
+        tickCheckBoxWithSameParent(obj, "PickerVendorUomReceiveUnit", "chbSelectVendorReceiveUnit", true);
+    }
+}
+
+function triggerTickCheckBoxByRadControl(obj) {
+    if (obj._uniqueId.indexOf("SelectorSimilarItem") != -1) {
+        var id = obj._uniqueId.substring(0, obj._uniqueId.indexOf("SelectorSimilarItem")) + "ChbSelectSimilarItem";
+        tickBox(id, true);
+    }
+    else if (obj._uniqueId.indexOf("EntitySelectorCopyFrom") != -1) {
+        var id = obj._uniqueId.substring(0, obj._uniqueId.indexOf("EntitySelectorCopyFrom")) + "CbhSelectCopyEntity";
+        tickBox(id, true);
+    }
+}
+
+
+function replaceId(obj, replaceRegEx, newText) {
+    return obj.id.replace(replaceRegEx, newText);
+
+}
+
+
+function ShowProcessing(control) {
+    control.outerHTML = "<img src='/Images/small_loading.gif' />";
+}
+
+
+
+
+/* start of timeout functionality */
+
+var autoExtendSession = false; // Auto extend session flag to make sure page never gets timed out. Used in the report portal page where reports may take a long time to load in an iframe
+
+$(document).ready(function() {
+    if (!window.MxSessionTimer) {
+        window.MxSessionTimer = new MxSessionTimerManager().init();
+    }
+});
+
+function MxSessionTimerManager() {
+
+    this.minutesInactive = 0;
+    this.sessionText = "";
+    this.timerId = 0;
+    this.lblSessionMessage = null;
+
+    this.init = function() {
+
+        var self = this;
+
+        self.sessionText = $("[id$=hdnSessionCounterMessage]").val();
+        self.lblSessionMessage = $(".session-value");
+
+        if (typeof (window.sessionLength) == "undefined" || typeof (window.sessionWarningAt) == "undefined") {
+            window.sessionLength = 60;
+            window.sessionWarningAt = 2;
+        }
+
+        self.setSessionTextMessage(sessionLength);
+
+        $("[id$=btnExtendSession]").click(function (e) {
+            self.extendSession();
+            e.preventDefault();
+            return false;
+        });
+
+        self.timerId = setInterval(function () {
+            try {
+                self.tick();
+            } catch (e) {
+                clearInterval(self.timerId);
+            }
+        }, 60 * 1000); // every minute
+
+        return self;
+    };
+
+    this.setSessionTextMessage = function (minutesLeft) {
+        if (this.sessionText)
+            this.lblSessionMessage.text(this.sessionText.replace("{0}", minutesLeft));
+    };
+
+    this.tick = function() {
+
+        var self = this;
+
+        var remainingMinutes = sessionLength - (self.minutesInactive + 1);
+        self.minutesInactive++;
+        self.setSessionTextMessage(remainingMinutes);
+
+        if (remainingMinutes <= sessionWarningAt) {
+            if (autoExtendSession) {
+                self.extendSession();
+            } else {
+                self.showSessionTimeoutWarning();
+            }
+        }
+
+        if (remainingMinutes <= 0) {
+            if (self.timerId) {
+                clearInterval(self.timerId);
+            }
+            self.redirectToLogout();
+        }
+    };
+
+    this.redirectToLogout = function () {
+        window.location = "/MMS_Logout.aspx";     
+    };
+
+    this.extendSession = function () {
+
+        var self = this;
+
+        $.ajax(
+        {
+            async: false,
+            type: "get",
+            url: "/Handlers/PingHandler.ashx",
+            success: function (data, status, xmlReq) {
+                if (data.IsAuthenticated == false)
+                    SessionTimeout(); //show timeout popup
+                else {
+                    self.resetInactivityTimeout();
+                }
+            }
+        });
+    };
+
+    this.showSessionTimeoutWarning = function () {
+        var tt = this.getTelerikTooltip();
+        tt.set_zIndex(2147483647); //make it a modal dialog
+        tt.show();
+        tt._closeElement.style.display = "none";
+    };
+
+    this.hideSessionTimeoutWindow = function () {
+        this.getTelerikTooltip().hide();
+    };
+
+    this.resetInactivityTimeout = function() {
+        this.minutesInactive = 0;
+        this.setSessionTextMessage(window.sessionLength);
+        this.hideSessionTimeoutWindow();
+    };
+
+    this.getTelerikTooltip = function() {
+        return $find($('[id$=tpSessionTimeout_ClientState]').parent('div[id$=tpSessionTimeout]').id());
+    };
+}
+
+/* end of timeout functionality */
+
+// Functions to show loading icon when reports is being downloaded
+
+function waitingCell_Hide() {
+    var waitingCell = document.getElementById('WaitingCell');
+    waitingCell.style.visibility = "hidden";
+}
+
+function waitingCell_Show() {
+    var waitingCell = document.getElementById('WaitingCell');
+    waitingCell.style.visibility = "visible";
+}
+
+function fnPromptError(message) {
+    parent.PromptError(message);
+}
+
+function PromptError() {
+    var hiddenButton = $(".ErrorPromptHandler");
+    if (hiddenButton.length > 0) {
+        hiddenButton.first().click();
+    }
+}
+
+function WaitForIFrame(frame) {
+    var waitingCell = document.getElementById('WaitingCell');
+    if (waitingCell == null) {
+        return false;
+    }
+
+    var iframe = frame || document.getElementById("downLoadframe");
+    if (iframe != null) {
+        waitingCell_Show();
+        var interval = window.setInterval(function () {
+            var doc = iframe.contentWindow || iframe.contentDocument;
+            var chromeready = doc.frames.frameElement.ownerDocument;
+            if (doc == null) {
+                return;
+            }
+            if (doc.document) {
+                doc = doc.document;
+            }
+            if (isIEBrowser()) {
+                if (doc.readyState !== "loading") {
+                    waitingCell_Hide();
+                    window.clearInterval(interval);
+                }
+            }
+            else if (chromeready.readyState == "loaded" || chromeready.readyState == "complete") { //Non IE
+                waitingCell_Hide();
+                window.clearInterval(interval);
+            }
+
+        }, 500);
+    }
+}
+// End of : Functions to show loading icon when reports is being downloaded
+
+
+// Functions to warn of unsaved data
+var _dirtyFlag = 0;
+var _prevValue = "";
+var _validateUnsavedDataFired = false;
+var _skipValidation = false;
+
+function CheckDirtyFlag() {
+    if (_dirtyFlag == 0)
+        return false;
+    return true;
+}
+
+function CleanDirtyFlag() {
+    SaveDirtyValue();
+    _dirtyFlag = 0;
+}
+
+function SetDirtyFlag() {
+    _dirtyFlag = 1;
+}
+
+function SetSkipValidation(value) {
+    _skipValidation = value;
+}
+
+function ConfirmLoseData() {
+    if (CheckDirtyFlag() == true) {
+        if (!confirm(GetUnsavedDataWarningMsg())) {
+            event.srcElement.value = _prevValue;
+            return false;
+        }
+        _dirtyFlag = 0;
+        ClearSavedDirtyValue();
+        __doPostBack(this.id, '');
+    }
+    return true;
+}
+
+function ConfirmLoseDataSimple() {
+    if (CheckDirtyFlag() == true) {
+        if (!confirm(GetUnsavedDataWarningMsg())) {
+            return false;
+        }
+        _dirtyFlag = 0;
+        ClearSavedDirtyValue();
+    }
+    return true;
+}
+
+function ConnectOnChangeSetDirtyFlag(controlIdToSetDirty, controlIdToExcludeWarning, controlIdToAddOnChangeConfirm) {
+    var f = document.forms[0];
+    for (var i = 0; i < f.elements.length; i++) {
+        if (f.elements[i].style.display != "none" && f.elements[i].style.visibility != "hidden") {
+            if (f.elements[i].id.indexOf(controlIdToSetDirty) != -1)
+                AddOnchangeHandler(f.elements[i]);
+            else if (f.elements[i].id.indexOf(controlIdToExcludeWarning) != -1 ) {
+                f.elements[i].onfocus = function () { _skipValidation = true; };
+                f.elements[i].onmousedown = function () { _skipValidation = true; };
+            }
+            else if ((f.elements[i].type == "select-one" && f.elements[i].outerHTML.indexOf("__doPostBack") != -1)
+                     || (controlIdToAddOnChangeConfirm != '' && f.elements[i].id.indexOf(controlIdToAddOnChangeConfirm) != -1)) {
+                AddOnchangeHandlerConfirm(f.elements[i]);
+
+            }
+        }
+    }
+}
+
+function jqConnectOnChangeSetDirtyFlag(controlsToSetDirty, controlsToExcludeWarning, controlsToAddOnChangeConfirm) {
+    if (controlsToSetDirty != null) {
+        controlsToSetDirty.each(function () {
+            var element = $(this)[0];
+            AddOnchangeHandler(element);
+        });
+    }
+    if (controlsToExcludeWarning != null) {
+        controlsToExcludeWarning.each(function () {
+            var element = $(this)[0];
+            element.onfocus = element.onmousedown = function () { _skipValidation = true; };
+        });
+    }
+    if (controlsToAddOnChangeConfirm != null) {
+        controlsToAddOnChangeConfirm.each(function () {
+            var element = $(this)[0];
+            AddOnchangeHandlerConfirm(element);
+        });
+    }
+
+    var f = document.forms[0];
+    for (var i = 0; i < f.elements.length; i++) {
+        if (f.elements[i].type == "select-one" && f.elements[i].outerHTML.indexOf("__doPostBack") != -1) {
+            AddOnchangeHandlerConfirm(f.elements[i]);
+        }
+    }
+}
+
+function AddOnchangeHandler(e) {
+    if (e.onchange == null) {
+        e.onchange = onChangeHandler;
+    }
+    else if (e.addEventListener) {
+        e.addEventListener('onchange', onChangeHandler, true);
+    } else {
+        e.attachEvent('onchange', onChangeHandler);
+    }
+}
+
+function onChangeHandler(e)
+{
+    //As of chrome v43.XXX, the autocomplete attribute is now ignored so instead of
+    //disabling it for a given field/form, we can check if a field was autofilled by
+    //chrome via -webkit-autofill CSS selector. However, IE does not yet support this
+    //psuedo selector.
+    if (isIEBrowser() || $('input:-webkit-autofill').parent().has(this).length === 0) {
+        SetDirtyFlag();
+    }
+}
+
+function isIEBrowser() {
+    var ua = window.navigator.userAgent;
+
+    return ua.indexOf("MSIE") > -1 || ua.indexOf("Trident/") > -1 || ua.indexOf("Edge/") > -1;
+}
+
+function AddOnchangeHandlerConfirm(e) {
+    e.onfocus = function() { _prevValue = e.value; };
+    if (e.onchange == null)
+        e.onchange = function() { if (ConfirmLoseData() == false) { return false; } };
+    else {
+        // Note: CanNOT use attachEvent here because__doPostBack will get called before
+        // the confirm message, so a post back will always be triggered even when
+        // hitting Cancel
+        var ev = e.onchange.toString();
+        if (typeof (e.onchange) == "function") {
+            ev = ev.substring(ev.indexOf("{") + 1, ev.lastIndexOf("}"));
+        } else {
+            ev = "";
+        }
+        e.onchange = new Function("event", "if(ConfirmLoseData()== false) {return false;};"  + ev);
+    }
+}
+
+function HandleOnBeforeUnload() {
+    if (_skipValidation == false && CheckDirtyFlag() == true)
+            return GetUnsavedDataWarningMsg();
+}
+
+function GetUnsavedDataWarningMsg() {
+    return "Navigating away from this screen will cause the entry to be lost. Do you want to continue?";
+}
+
+function ValidateUnsavedData(sender, args) {
+    if (_skipValidation == false && _validateUnsavedDataFired == false) { // this is due to IE bug where event fired twice
+        if (!ConfirmLoseDataSimple()) {
+            args.IsValid = false;
+            return;
+        }
+        args.IsValid = true;
+        _dirtyFlag = 0;
+        _validateUnsavedDataFired = true;
+        return;
+    }
+}
+
+function SetHiddenDirtyValue(val) {
+    // NOTE: Can be overridden by page
+}
+
+function GetHiddenDirtyValue() {
+    // NOTE: Can be overridden by page
+    return false;
+}
+
+function SaveDirtyValue() {
+    // NOTE: Can be overridden by page
+    SetHiddenDirtyValue(CheckDirtyFlag().toString());
+}
+
+function ClearSavedDirtyValue() {
+    // NOTE: Can be overridden by page
+    SetHiddenDirtyValue("false");
+    SetSkipValidation(false);
+}
+
+function RestoreDirtyValue() {
+    if (GetHiddenDirtyValue() == "true") {
+        SetDirtyFlag();
+    }
+    else {
+        CleanDirtyFlag();
+    }
+    SetSkipValidation(false);
+}
+
+function CatchEnterSkipValidation() {
+    if (event.keyCode == 13) {
+        SaveDirtyValue();
+        SetSkipValidation(true);
+    }
+}
+
+//function to override background color of any element by supplying a relevent id for naming.
+function createColorOverrideStyle(element, color) {
+    var id = "mxElementColorOverride";
+    var style = $('#' + id);
+    var class0 = "mxElementColorOverride0";
+    var class1 = "mxElementColorOverride1";
+    var classToApply = class0;
+
+    if (style.length !== 0) {
+        $('body > #' + id).remove();
+    }
+    if (element.hasClass(class0) == true) {
+        classToApply = class1;
+        element.removeClass(class0);
+    }
+    else {
+        classToApply = class0;
+        element.removeClass(class1);
+    }
+
+    style = $('<style id="' + id + '" type="text/css"> .' + classToApply + '{ background-color: ' + color + ' !important;}</style>');
+    $("body").append(style);
+
+    element.addClass(classToApply);
+}
+
+// End of : Functions to warn of unsaved data
+
+// Control Locking for closed Periods
+
+$(document).ready(function () {
+    $('.periodLock').attr('disabled', 'disabled');
+    $('.periodLock').find('*').attr('disabled', 'disabled');
+});

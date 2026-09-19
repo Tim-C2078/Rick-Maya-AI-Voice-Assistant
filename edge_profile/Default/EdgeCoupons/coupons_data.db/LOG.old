@@ -1,0 +1,15 @@
+2026/09/17-18:29:54.065 33b4 Reusing MANIFEST C:\Users\Admin\Desktop\Projects\jean.2.0\edge_profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/17-18:29:54.072 33b4 Recovering log #42
+2026/09/17-18:29:54.074 33b4 Reusing old log C:\Users\Admin\Desktop\Projects\jean.2.0\edge_profile\Default\EdgeCoupons/coupons_data.db/000042.log 
+2026/09/17-18:29:54.153 31a4 Level-0 table #46: started
+2026/09/17-18:29:54.160 31a4 Level-0 table #46: 683376 bytes OK
+2026/09/17-18:29:54.162 31a4 Delete type=0 #42
+2026/09/17-18:29:54.163 2fac Compacting 4@0 + 1@1 files
+2026/09/17-18:29:54.173 2fac Generated table #47@0: 3 keys, 683376 bytes
+2026/09/17-18:29:54.173 2fac Compacted 4@0 + 1@1 files => 683376 bytes
+2026/09/17-18:29:54.174 2fac compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/09/17-18:29:54.175 2fac Delete type=2 #34
+2026/09/17-18:29:54.175 2fac Delete type=2 #37
+2026/09/17-18:29:54.175 2fac Delete type=2 #40
+2026/09/17-18:29:54.175 2fac Delete type=2 #43
+2026/09/17-18:29:54.175 2fac Delete type=2 #46

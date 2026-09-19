@@ -1,0 +1,6 @@
+2026/09/17-18:35:27.363 2ec0 Reusing MANIFEST C:\Users\Admin\Desktop\Projects\jean.2.0\edge_profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/09/17-18:35:27.364 2ec0 Recovering log #45
+2026/09/17-18:35:27.364 2ec0 Reusing old log C:\Users\Admin\Desktop\Projects\jean.2.0\edge_profile\Default\EdgeCoupons/coupons_data.db/000045.log 
+2026/09/17-18:35:27.463 3014 Level-0 table #50: started
+2026/09/17-18:35:27.467 3014 Level-0 table #50: 683376 bytes OK
+2026/09/17-18:35:27.469 3014 Delete type=0 #45

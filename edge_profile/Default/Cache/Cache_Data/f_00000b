@@ -1,0 +1,2610 @@
+﻿//Modified 17-10-2012
+var sideBarOpen = false;
+var currentDashboard = -1;
+
+var currentParams = "";
+var currentUserType = "";
+var IsSingleItemDB = 0;
+
+
+function gridpercentage(val) {
+      var nval = $(val).clone(); 
+	   if ($(val).text() == "") { 
+	      nval.text("");
+	    }
+		 else
+		  {
+		    if (parseFloat($(val).text()) == 0) {
+			  nval.text("-%");
+			 }
+			  else
+			   {
+			    var lval = parseFloat($(val).text());				
+				lval = lval.toFixed(1);
+	            nval.text(lval+"%"); 
+				 }
+		  }
+	  return $(nval).clone().wrap('<p>').parent().html();
+    }
+	
+function AddThousandSeperators(x, type) {
+	if ( type === 'display' )
+	{
+		var parts = x.toString().split(".");
+		parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		return parts.join(".");
+	}
+	return x;
+}
+
+function RemoveThousandSeperators(x) {
+    var result = x.replace(",", "");
+    return result;
+}	
+	
+function setDashboardID(dbid) {
+    currentDashboard = dbid;
+}
+
+function setUserType(usertype) {
+    currentUserType = usertype;
+}
+
+            $.fn.dataTableExt.oApi.fnStandingRedraw = function (oSettings) {
+
+                if (oSettings.oFeatures.bServerSide === false) {
+                    var before = oSettings._iDisplayStart;
+                    oSettings.oApi._fnReDraw(oSettings);
+                    oSettings._iDisplayStart = before;
+                    oSettings.oApi._fnCalculateEnd(oSettings);
+                }
+                   oSettings.oApi._fnDraw(oSettings);
+            };
+ 
+    $.fn.dataTableExt.oApi.fnReloadAjax = function (oSettings, sNewSource, fnCallback, bStandingRedraw) {
+        if (typeof sNewSource != 'undefined' && sNewSource != null) {
+            oSettings.sAjaxSource = sNewSource;
+        }
+        this.oApi._fnProcessingDisplay(oSettings, true);
+        var that = this;
+        var iStart = oSettings._iDisplayStart;
+        var aData = [];
+
+        this.oApi._fnServerParams(oSettings, aData);
+
+        oSettings.fnServerData(oSettings.sAjaxSource, aData, function (json) {
+            that.oApi._fnClearTable(oSettings);
+            var aData = (oSettings.sAjaxDataProp !== "") ?
+            that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json) : json;
+
+            for (var i = 0; i < aData.length; i++) {
+                that.oApi._fnAddData(oSettings, aData[i]);
+            }
+
+            oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+            that.fnStandingRedraw(oSettings);
+
+            if (typeof bStandingRedraw != 'undefined' && bStandingRedraw === true) {
+                oSettings._iDisplayStart = iStart;
+                that.fnDraw(false);
+            }
+
+            that.oApi._fnProcessingDisplay(oSettings, false);
+            if (typeof fnCallback == 'function' && fnCallback != null) {
+                fnCallback(oSettings);
+            }
+        }, oSettings);
+    };
+
+
+function eraseCookie(name) {
+    createCookie(name, "", -1); 
+}
+
+function createCookie(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+    }
+    else expires = "";
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+
+$.dbbg = ['#B8FCC4','#C2FFCE','#CCFFD8','#B0F3AE','#CDFFC2','#D7FFCC','#E1FFD6','#EBFFE0','#F5FFEA'];
+
+function dbbgColor(uid,ind) {
+    var ci = ind % 9;
+    var col = $.dbbg[ci];
+    $(uid).css({ 'background-color' : '#FFFFFF'});
+}
+
+
+$.xhrPool = [];
+$.xhrPool.abortAll = function () {
+    $(this).each(function (idx, jqXHR) {
+        jqXHR.abort();
+    });
+    $.xhrPool.length = 0
+};
+
+$.timerPool = [$.timer(function() {},50000,false)];
+
+$.timerPool.stopAll = function () {
+    $(this).each(function (idx, timer) {
+        timer.stop();
+    });
+    var l = $(this).length;
+    $(this).splice(0, l);
+    $.timerPool.length = 0;
+}
+
+
+function msReadable(milliSecs) {
+    msSecs = (1000)
+    msMins = (msSecs * 60)
+    msHours = (msMins * 60)
+    numHours = Math.floor(milliSecs / msHours)
+    numMins = Math.floor((milliSecs - (numHours * msHours)) / msMins)
+    numSecs = Math.floor((milliSecs - (numHours * msHours) - (numMins * msMins)) / msSecs)
+
+
+    if (numSecs < 10) {
+        numSecs = "0" + numSecs
+    }
+    if (numMins < 10) {
+        numMins = "0" + numMins
+    }
+
+    return numHours + ":" + numMins + ":" + numSecs 
+}
+
+function alertTimers() {
+    var arr = $.timerPool;
+    var re = new RegExp("tbl_");
+    $.each(arr, function (ind, obj) {
+        var str = obj.action.toString();
+        var m = re.exec(str);
+        if (m != null) {
+            var uid = str.substring(m.index + 4, $.inArray('.', str));
+
+            var msg = 'Item:' + uid + '\n';
+            msg = msg + 'Last: ' + obj.last + '\n';
+            msg = msg + 'interVal: ' + obj.intervalTime + '\n';
+            alert(msg);
+        }
+    });
+}
+
+
+function showTimers() {
+
+   var arr = $.timerPool;
+    var re = new RegExp("tbl_");
+    $.each(arr, function (ind, obj) {
+        var str = obj.action.toString();
+        var m = re.exec(str);
+        if (m != null) {
+            var uid = str.substring(m.index + 4, $.inArray('.', str));
+            if (this.timeRemain() > 0) {
+                $('#tmr_' + uid).html(' (Update in ' + msReadable(this.timeRemain()) + ")");
+            }
+            else {
+                $('#tmr_' + uid).html('');
+            }
+
+        }
+    }); 
+	arr = null;
+	re = null;
+	
+	
+}
+
+
+
+$.timerPool.pauseAll = function () {
+    $(this).each(function (idx, timer) {
+    try {
+        timer.stop();}
+    catch(err) {
+    }
+    });
+}
+
+$.timerPool.activeCount = function () {
+    var cnt = 0;
+    $(this).each(function (idx, timer) {
+        if (timer.active) { cnt = cnt + 1; }
+    });
+    return cnt;
+}
+
+$.timerPool.resumeAll = function () {
+    if (readCookie('autoUpdate') !== 'false') {
+        $(this).each(function (idx, timer) {
+            timer.play();
+        });
+    }
+}
+
+function startTimer(action, interval) {
+    $.timerPool.push($.timer(action, interval, true));
+    if (readCookie('autoUpdate') == 'false') {
+        $.timerPool.pauseAll();
+    }
+ }
+
+
+$.ajaxSetup({
+    timeout: 120000,
+    dataType: 'html',
+    beforeSend: function (jqXHR) {
+        var userid = readCookie("userid");
+        var run = true
+        if (userid == null) {
+            eraseCookie(".ASPXAUTH");
+            if (this.url.slice(0, 15) !== "/pub/login.ashx") {
+                location.reload();
+                run = false;
+            }
+
+        }
+        if (run) {
+            $.xhrPool.push(jqXHR);
+        }
+        else { $.xhrPool.abortAll; return false; }
+    },
+    complete: function (jqXHR) {
+        var index = $.inArray(jqXHR,$.xhrPool);
+        if (index > -1) {
+            $.xhrPool.splice(index, 1);
+        }
+    }
+});
+
+function checkSessionVar(sessionvar,whattodo) {
+      $.ajax({
+        type: "GET",
+        url: "/pub/getSessionVar.ashx?sessionvar=" + sessionvar,
+        cache: false,
+        success: function (data) { whattodo(data); },
+        error: function (data) { whattodo("Error: 404"); }
+    });
+}
+
+function setSessionVar(sessionvar,sessionval,whattodo) {
+    
+    $.ajax({
+        url: "/pub/setSessionVar.ashx?sessionvar=" + sessionvar + "&sessionval=" + sessionval,
+        cache: false,
+        success: function (data) { whattodo(data); },
+        error: function (data) { whattodo("Error: 404"); }
+    });
+}
+
+function loginUser(user, password, whattodo) {
+    $.ajax({
+        url: "/pub/login.ashx?dologin=1&user=" + user + "&pass=" + password,
+        cache: false,
+        success: function (data) { whattodo(data); },
+        error: function (data) { whattodo(data); }
+    });
+}
+
+function Ajax_CreateDashboardMenu(url, parameters)
+{
+    $.ajax({
+        url: url + "?" + parameters,
+        success: function (data) {
+            $("#DashboardSelectArea").html(data);
+            $("#DashboardSelectArea").show();
+
+
+        },
+        error: function (data) {
+            alert(data);
+        }
+    });
+
+}
+
+function Ajax_CreateContextMenu(url, parameters) {
+
+    $.ajax({
+        url: url + "?" + parameters,
+        success: function (data) {
+            $("#DashboardContextArea").html(data);
+            $("#DashboardContextArea").show();
+
+            $('#menuReload > SPAN').removeClass('ui-button-text');
+            $('#menuReloadAll > SPAN').removeClass('ui-button-text');
+            $('#menuExpandAll2 > SPAN').removeClass('ui-button-text');
+            $('#menuCollapse_All2 > SPAN').removeClass('ui-button-text');
+            $('#menuLogIssue > SPAN').removeClass('ui-button-text');
+            $('#menuLogout > SPAN').removeClass('ui-button-text');
+
+            $("#DashboardContextArea").hide("fast");
+
+            $("#ExpandAll2").hide();
+            $("#Collapse_All2").hide();
+            if (!readCookie("hideAll")) {
+                var arr = readCookie("defaultDash").split(",");
+                GetDashboard(arr[0],arr[1]);
+            }
+            //ToggleDashboardsMenu();
+        },
+        error: function (data) {
+            alert(data);
+        }
+    });
+
+
+
+}
+
+
+function callAjax(url, parameters, whattodo) {
+
+    $.ajax({
+        url: url + "?" + parameters,
+        success: function (data) { whattodo(data); },
+        error: function (data) { whattodo(data); }
+    });
+        
+}
+
+function postAjax(url, data, whattodo ) {
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: data,
+        success: function (rdata) 
+                    {
+                        whattodo(rdata); 
+                    }
+    });
+
+}
+
+function postAjaxNoReturn(url, data) {
+    $.ajax({
+        url: url,
+        data: data,
+        success: function (data) {  }
+    });
+
+}
+
+function postPostAjaxNoReturn(url, data) {
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: data,
+        success: function (data) { }
+    });
+
+}
+
+function loadReportlist() {
+    $("#reportlistdiv").children().remove(); /* MFT NEW NAV  */
+    $("#reportlistdiv").empty();
+
+    //    callAjax("/members/getReportList.ashx", "", function (data) { $("#reportlistdiv").html(data) });
+    var url = "/members/getReportList.ashx";
+    var params = "userid=" + readCookie("userid")
+
+    $.ajax({
+        url: url + "?" + params,
+        success: function (data) {
+            $("#reportlistdiv").html(data);
+        },
+        error: function (data) {
+            alert(data);
+        }
+    });
+}
+
+function loadChartlist() {
+    callAjax("/members/getChartList.ashx", "", function (data) { $("#chartlistdiv").html(data) });
+}
+
+
+function loadReportParams(ui) {
+    report = $(ui).attr("reportid");
+    reportname = $(ui)[0].innerText;
+    $(".reportlistitem").removeClass('ui-state-highlight');
+    $(ui).addClass('ui-state-highlight');
+    $('#repid').val(report);
+    callAjax("/members/getReportParameters.ashx", "reportname=" + reportname + "&report=" + report, function (data) { $("#reportparams").html(data); $('#newreportparams').html(''); $('.multiselect').multiselect("refresh"); $('.singleselect').multiselect("refresh"); $("#reportbuttons").show(); });
+}
+
+function loadChartViewPage(ui) {
+    report = $(ui).attr("reportid");
+    reportname = $(ui)[0].innerText;
+    $(".reportlistitem").removeClass('ui-state-highlight');
+    $(ui).addClass('ui-state-highlight');
+    $('#repid').val(report);
+    
+    //callAjax("/members/getChartParameters.ashx", "reportname=" + reportname + "&report=" + report, function (data) { $("#reportparams").html(data); $('.multiselect').multiselect("refresh"); $('.singleselect').multiselect("refresh"); $("#reportbuttons").show(); });
+    openChartInBrowser(report, 0);
+}
+
+function loadChartParams2(reportid) {
+    callAjax("/members/getChartParameters.ashx", "reportname=" + "" + "&report=" + reportid, function (data) { $("#Parameter_Toolbar").html(data); $('.multiselect').multiselect("refresh"); $('.singleselect').multiselect("refresh"); $("#reportbuttons").show(); });
+}
+
+function clearChildren(ui) {
+
+}
+
+function clearOtherTabs(selectindex) {
+    var tab = $("#tabs .ui-tabs-panel");
+    var tab_count = tab.length;
+    tab.each(function (index) {
+        $(this).children().remove();
+    });
+}
+
+
+function generateReport(ui) {
+    var arrParams = $(".param");
+    var arrCount = $(".paramcomplete");
+    var runReport = 0;
+    reportid = $('#repid').val();
+
+
+
+    $('#newreportparams').html(''); //MTITUS ADDED
+    $('#newreportparams').append("<input type='hidden' id='input_report' name='report' value='" + reportid + "'/>");
+    $('#newreportparams').append("<input type='hidden' id='input_reporttype' name='reporttype' value='" + ui + "'/>");
+
+    if (arrParams.length == arrCount.length) {
+        runReport = 1;
+    }
+    else {
+        alert("Please select all parameters");
+    }
+
+    if (runReport == 1) {
+        var paramstr = "reporttype=" + ui + "&";
+        paramstr = paramstr + "reportid=" + reportid + "&";
+
+        arrParams.each(function () {
+
+            paramstr = paramstr + $(this).attr('name') + "="
+            paramstr = paramstr + $(this).val() + "&";
+
+            $('#newreportparams').append("<input type='hidden' name='" + $(this).attr('name') + "' value='" + $(this).val() + "'/>");
+
+        });
+
+        paramstr = paramstr.substr(0, paramstr.length - 1);
+        if (ui == 1) {
+            postAjax("/members/generateReport.ashx", paramstr, function (data) { openReportInBrowser(data); });
+        }
+        if (ui == 5 || ui == 6 || ui == 7) {
+            //postAjax("/members/generateReport.ashx", paramstr, function (data) { newWindow(data); });
+            //window.open("/members/generateReport.ashx?" + RemoveAndStore_StockCodes(paramstr));
+            document.forms['frmNewParams'].submit();
+			//window.open("/members/generateReport.ashx?" + paramstr);
+        }
+        if (ui == 2) {
+
+            window.open("/members/generateReport.ashx?" + paramstr);
+        }
+        if (ui == 3) {
+            window.open("/members/generateReport.ashx?" + paramstr);
+        }
+    }
+
+}
+
+
+//function generateReport(ui) {
+//    var arrParams = $(".param");
+//    var arrCount = $(".paramcomplete");
+//    var runReport = 0;
+//    reportid = $('#repid').val();
+
+//    if (reportid != 66 && ui == 5) ui = 2;
+
+//    $('#newreportparams').html(''); //MTITUS ADDED
+//    $('#newreportparams').append("<input type='hidden' id='input_report' name='report' value='" + reportid + "'/>");
+//    $('#newreportparams').append("<input type='hidden' id='input_reporttype' name='reporttype' value='" + ui + "'/>");
+
+//    if (arrParams.length == arrCount.length) {
+//        runReport = 1;
+//    }
+//    else {
+//        alert("Please select all parameters");
+//    }
+
+//    if (runReport == 1) {
+//        var paramstr = "reporttype=" + ui + "&";
+//        paramstr = paramstr + "reportid=" + reportid + "&";
+
+//        arrParams.each(function () {
+//            
+//            paramstr = paramstr + $(this).attr('name') + "="
+//            paramstr = paramstr + $(this).val() + "&";
+
+//            $('#newreportparams').append("<input type='hidden' name='" + $(this).attr('name') + "' value='" + $(this).val() + "'/>");
+
+//          });
+
+//        paramstr = paramstr.substr(0, paramstr.length - 1);
+//        if (ui == 1) {
+//            postAjax("/members/generateReport.ashx", paramstr, function (data) { openReportInBrowser(data); });
+//        }
+//        if (ui == 5) {
+//            //postAjax("/members/generateReport.ashx", paramstr, function (data) { newWindow(data); });
+//            //window.open("/members/generateReport.ashx?" + RemoveAndStore_StockCodes(paramstr));
+//            document.forms['frmNewParams'].submit();
+//        }
+//        if (ui == 2) {
+//            
+//            window.open("/members/generateReport.ashx?" + paramstr);
+//         }
+//        if (ui == 3) {
+//            window.open("/members/generateReport.ashx?" + paramstr);
+//        }
+//      }
+
+//}
+
+function newWindow(data) {
+    var w = window.open();
+    var d = w.document;
+    d.open;
+    d.write(data);
+    
+
+    
+}
+//  MTitus
+function generateChart(reportid, pDb_itemid, db_id) {
+    var p = getChartParameterSelection(pDb_itemid);
+    if (p == "") {
+        alert("Please select all parameters");
+    }
+    else {
+        postAjax("/members/Dashboard/dbLoadChartItem.ashx", "itemid=" + pDb_itemid + "&uniqueid=" + "501_0_0_000" + "&params=" + p + "&dashboardid=" + db_id, function (data) { $("#reportdata").html(data); });
+        $("#lbl_time").text("Generated:" + currentDate());
+        updateDBParamHeaderForCharts();
+    }
+}
+
+//  MTitus
+function getChartParameterSelection(pDb_itemid) {
+    var arrParams = $(".param");
+    var arrCount = $(".paramcomplete");
+    var runReport = 0;
+    reportid = $('#repid').val();
+
+    if (arrParams.length == arrCount.length) {
+        runReport = 1;
+    }
+    else {
+        return "";
+    }
+
+    if (runReport == 1) {
+        p = "<params>";
+        arrParams.each(function (index, value) {
+            p = p + "<gaapparam><name>" + $(this).attr('name') + "</name><value>" + $(this).val() + "</value></gaapparam>";
+        });
+        p = p + "</params>";
+        currentParams = p;
+        p = p.replace('nodegrouplist', 'groupid');
+
+        return p;
+    }
+}
+
+function openReportInBrowser(data) {
+    w = window.open("/members/ReportViewer.html", "_blank");
+    w.document.open();
+    $("#reportdata", w.document).html(data);
+
+}
+
+//  MTitus
+function openChartInBrowser(reportid, db_itemID) {
+   
+//    var cid = db_itemID + "_" + currentDateTimeYMD_HMS();
+//    createCookie("params" + cid, p);
+//    createCookie("itemid" + cid, db_itemID);
+//    createCookie("dashboardid" + cid, "-9999");
+
+    w = window.open("chartviewer.html" + "?itemid=" + db_itemID + "&rid=" + reportid, "_blank");
+    w.focus();
+}
+
+//MTITUS
+function RemoveAndStore_StockCodes(paramstr) {
+    var pos = paramstr.indexOf("&stockcodes")
+    if (pos != -1) {
+        var stockcodes = paramstr.substring(pos + 12);
+        eraseCookie("stockcodes");
+        createCookie("stockcodes", stockcodes, 0);
+        return paramstr.substring(0, pos);
+    }
+    else {
+        return paramstr;
+    }
+}
+
+function saveFileToDisc(data) {
+    w = window.open();
+    w.document.open();
+    w.document.write(data);
+    w.document.close();
+}
+
+function doDrillDownTable(ui,div) {
+    $(document).ready( function (){
+    if (ui.id.substr(0,7) == 'btnBack') {
+            showBack(ui.id.substr(8,20),0);
+        }
+    p = $(ui).attr("params");
+    di = $(ui).attr("dashboardid");
+    uniqueid = $(div).attr("uniqueid");
+    $.ajax({
+       type: 'POST',
+        url: "/members/dashboard/dbloadDashboardItem.ashx",
+        data: "&itemid=" + di + "&params=" + p + "&uniqueid=" + uniqueid + "&IsSingleItemDB=" + IsSingleItemDB,
+        success: function (data) { $(div).html(data); }
+    });
+    })
+
+}
+
+function currentDate() {
+    var date = new Date();
+    var m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    var y = date.getFullYear();
+    var m = date.getMonth();
+    var d = date.getDate();
+    var h = date.getHours();
+    var n = date.getMinutes();
+    var s = date.getSeconds();
+
+    h = h + "";
+    n = n + "";
+    s = s + "";
+
+    if (h.length == 1) {h = "0" + h; }
+    if (n.length == 1) {n = "0" + n; }
+    if (s.length == 1) {s = "0" + s; }
+
+
+
+    return d + " " + m_names[m] + " " + y + " " + h + ":" + n + ":" + s;
+
+}
+
+function shortDate() {
+    var date = new Date();
+    var m_names = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    var y = date.getFullYear();
+    var m = date.getMonth();
+    var d = date.getDate();
+    var h = date.getHours();
+    var n = date.getMinutes();
+    var s = date.getSeconds();
+
+    h = h + "";
+    n = n + "";
+    s = s + "";
+
+    if (h.length == 1) {h = "0" + h; }
+    if (n.length == 1) {n = "0" + n; }
+    if (s.length == 1) {s = "0" + s; }
+
+
+
+    return d + " " + m_names[m] + " " + y + " " + h + ":" + n + ":" + s;
+
+}
+
+
+function printTable(table) {
+    var o = $('#' + table);
+       style = o[0].children[0].outerHTML
+       table = o[0].children[1].children[0].outerHTML
+ 
+    w = window.open();
+    d = w.document;
+    d.open();
+    //d.write($(o[0]).outerHTML);
+   d.write(style + table);
+    d.close();
+    w.print();
+}
+
+function removeElementsByClass(className) {
+    var elements = document.getElementsByClassName(className);
+    while (elements.length > 0) {
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
+function HideFixedHeader() {
+    if ($(".FixedHeader_Cloned").is(":visible") == true) {
+        $('.FixedHeader_Header').hide();
+    }
+}
+
+function HideRemove_FixedHeaderClone() {
+    //FixedHeader_Cloned fixedHeader FixedHeader_Header
+    $(document).ready(function () {
+        //        $('.FixedHeader_Cloned').hide();
+        //        $('.FixedHeader_Cloned').remove();
+
+        //        $('.FixedHeader_Header').hide();
+        //        $('.FixedHeader_Header').remove();
+
+        //$(".FixedHeader_Cloned, .fixedHeader, .FixedHeader_Header").remove();
+//        $('.FixedHeader_Header').addClass("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        $('.FixedHeader_Header .dataTable').remove();
+        $('.FixedHeader_Header').remove();
+
+                $(".FixedHeader_Cloned").each(function () {
+                    $(this).hide();
+                    $(this).remove();
+                });
+
+        //        removeElementsByClass("FixedHeader_Cloned");
+
+    });
+}
+
+function refreshDashboard(dbid,msg) {
+    $(document).ready(function () {
+
+        HideRemove_FixedHeaderClone();
+
+        $('.dbitem').hide();
+        var arrParams = $('.param', '#db_' + dbid + '_params');
+        var arrCount = $(".paramcomplete", '#db_' + dbid + '_params');
+        var runReport = 0;
+
+        if (arrParams.length == 0) { //NO PARAMATERS FOR THIS DASHBOARD
+            runReport = 1;
+        }
+        else if (arrParams.length == arrCount.length) {
+            runReport = 1;
+        }
+        else {
+            if (msg == true) {
+                ToggleParamsHeader("show");
+                alert("Please select all parameters");
+            }
+        }
+
+        if (runReport == 0) {
+            $('.dbitem').hide();
+
+            $("#ExpandAll2").hide();                          /* MFT NEW NAV  */
+            $("#Collapse_All2").hide();                        /* MFT NEW NAV  */
+
+            if (arrCount.length == 0 && arrParams.length > 0)   /* MFT NEW NAV  */
+            {                                                   /* MFT NEW NAV  */
+                if ($(".mw_title").length > 0) {            /* MFT NEW NAV  */
+                    if (arrParams.length > 1) {
+                        ToggleParamsHeader("show");
+                    }
+                    var index = arrCount.length;
+                    $(".mw_title")[0].click();              /* MFT NEW NAV  */
+                }                                           /* MFT NEW NAV  */
+            }                                               /* MFT NEW NAV  */
+        }
+        var dbitem_count = 0;  /* MFT NEW NAV  */
+
+        if (runReport == 1) {
+
+            p = "<params>";
+            $('.param', '#db_' + dbid + '_params').each(function (index, value) {
+                p = p + "<gaapparam><name>" + $(this).attr('name') + "</name><value>" + $(this).val() + "</value></gaapparam>";
+            });
+            p = p + "</params>";
+            currentParams = p;
+
+            if ($('.dbitem').length <= 1) { IsSingleItemDB = 1; } else { IsSingleItemDB = 0; }
+
+            $('.dbitem').each(function (index, dbitem) {
+
+                if (IsSingleItemDB == 1) {
+                    var unique_id1 = $(dbitem).attr("unique");
+                    $("#toolbar_" + unique_id1).find('.reporttitle-grey:first').addClass("ui-state-active");
+                }
+
+                postAjax("/members/Dashboard/dbLoadDashboardItem.ashx", "itemid=" + $(dbitem).attr("dashboarditem") + "&uniqueid=" + $(dbitem).attr("unique") + "&params=" + p + "&dasboardid=" + dbid + "&IsSingleItemDB=" + IsSingleItemDB, function (data) {
+                    var unique_id = $(dbitem).attr("unique");           /* MFT NEW NAV  */
+                    HideDateParams(unique_id, "hide");
+
+                    $("#dbitemchild_" + unique_id).html(data);          /* MFT NEW NAV  changed to use var unique_id*/
+                    AddExcelButton(unique_id);
+
+
+                    if (IsSingleItemDB == 1) {
+                        $("#dbitemchild_" + unique_id).hide();
+                        if ($(".FixedHeader_Cloned") != undefined) {
+                            $(".FixedHeader_Cloned").hide();
+                        }
+                    }
+                    Enable_Disable_DashboardItem(unique_id, 'disable');     /* MFT NEW NAV  */
+
+                    $("#tbl_" + unique_id).on('xhr.dt', function ()         /* MFT NEW NAV  */
+                    {                                                       /* MFT NEW NAV  */
+                        //HideDateParams(unique_id, "show");
+                        Enable_Disable_DashboardItem(unique_id, 'enable');  /* MFT NEW NAV  */
+                        //$("#toolbar_" + unique_id).find('.tablebar:first').css('height', '36px');
+
+                        if (IsSingleItemDB == 1) {
+                            $("#toolbar_" + unique_id).find('.reporttitle-grey:first').addClass("ui-state-active");
+
+                            $("#dbitemchild_" + unique_id).show('fast', function () {
+                                if (IS_IPAD() == 1) {
+                                    AutoZoomFitToScreen_IPAD();
+                                }
+                                else if (IS_MSIE() == 1) {
+                                    AutoZoomFitToScreen_MSIE();
+                                }
+                                else if (IS_CHROME() == 1) {
+                                    AutoZoomFitToScreen_CHROME();
+                                }
+                                else {
+                                    AutoZoomFitToScreen_MSIE();
+                                }
+                            }
+                                                               );
+                        }
+                        if ($(".FixedHeader_Cloned") != undefined) {
+                            $(".FixedHeader_Cloned").hide();
+                        }
+                    });                                                     /* MFT NEW NAV  */
+
+                });
+
+                dbitem_count++;                                             /* MFT NEW NAV  */
+            });
+
+
+            if ($('.dbitem').length > 1) {
+                HideRemove_FixedHeaderClone();
+
+                $("#headingstatustext").removeClass("FitToNone");
+                $("#headingstatustext").addClass("FitToWidth");
+            }
+
+            ToggleParamsHeader("hide");
+
+            $('#btnPauseResume').text("Pause Updates");
+            $('.dbitem.show').show();
+
+            updateDBParamHeader();
+
+            if (dbitem_count > 1) {             /* MFT NEW NAV  */
+                $("#ExpandAll2").show();      /* MFT NEW NAV  */
+                $("#Collapse_All2").show();    /* MFT NEW NAV  */
+            }                                   /* MFT NEW NAV  */
+            else {                              /* MFT NEW NAV  */
+                $("#ExpandAll2").hide();      /* MFT NEW NAV  */
+                $("#Collapse_All2").hide();    /* MFT NEW NAV  */
+            }                                   /* MFT NEW NAV  */
+
+//            if (readCookie('hideAll') == true) { if (dbitem_count > 1) { CollapseAllDashboardItems(); } } 
+//            { }
+//            if ($('#optHideAllOnStart')[0] == undefined)                            /* MFT NEW NAV  */
+//            {
+//              
+//            }
+//            else if ($('#optHideAllOnStart')[0].checked == true && dbitem_count > 1) {   /* MFT NEW NAV  */
+//                CollapseAllDashboardItems();                                        /* MFT NEW NAV  */
+//            }                                                                       /* MFT NEW NAV  */
+        }
+    })
+
+}
+
+function AddExcelButton(DataTableUniqueID) {
+
+    var ReportName = $("#lbl_" + DataTableUniqueID).text();
+    var html_excelInteractive = "<div id='divx_" + DataTableUniqueID + "' style='width:160px; height:auto; position:relative; display:inline-block; float:left; clear:both; display:none;'>";
+    html_excelInteractive += "<a id='MicrosoftExcelButton_" + DataTableUniqueID + "' href='#' name='MicrosoftExcelButton' data-xl-tableTitle='" + ReportName + "' data-xl-buttonStyle='Standard' data-xl-fileName='" + ReportName + "' data-xl-attribution='Data provided by Gaap'></a>";
+    html_excelInteractive += "</div>";
+    html_excelInteractive += "<script type='text/javascript' src='http://r.office.microsoft.com/r/rlidExcelButton?v=1&kip=1'></script>";
+
+    $("#tbl_" + DataTableUniqueID).before(html_excelInteractive);
+
+}
+
+function getContentFromIframe(iFrameName) {
+
+    var myIFrame = document.getElementById(iFrameName);
+    var content = myIFrame.contentWindow.document.body.innerHTML;
+
+    alert('content: ' + content);
+
+    content = 'The inside of my frame has now changed';
+    myIFrame.contentWindow.document.body.innerHTML = content;
+
+}
+
+function injectHTML(){
+
+    //step 1: get the DOM object of the iframe.
+
+    var iframe = document.getElementById('test_iframe');
+    var html_string = '<html><head></head><body><p>iframe content injection</p></body></html>';
+ 
+    /* if jQuery is available, you may use the get(0) function to obtain the DOM object like this:
+
+    var iframe = $('iframe#target_iframe_id').get(0);
+
+    */
+
+    //step 2: obtain the document associated with the iframe(such as the NetScape series) .contentDocumet, while some (e.g. IE5/6) supports .contentWindow.document
+    //we try to read whatever that exists. tag
+    //most of the browser supports .document. Some supports 
+    var iframedoc = iframe.document;
+        if (iframe.contentDocument)
+            iframedoc = iframe.contentDocument;
+        else if (iframe.contentWindow)
+            iframedoc = iframe.contentWindow.document;
+ 
+     if (iframedoc){
+         // Put the content in the iframe
+         iframedoc.open();
+         iframedoc.writeln(html_string);
+         iframedoc.close();
+     } else {
+        //just in case of browsers that don't support the above 3 properties.
+        //fortunately we don't come across such case so far.
+        alert('Cannot inject dynamic contents into iframe.');
+     }
+ 
+}
+
+
+
+function Enable_Disable_DashboardItem(unique_id, action) {  /* MFT NEW NAV  */
+    var maxScreenWidth = $(window).width() - 14;
+    var MaxWidthPX = maxScreenWidth + "px";
+    
+    if (action == null || action == 'disable') {
+
+        //setTimeout(function () { $("#busy_" + unique_id).show(); }, 10);
+        $("#busy_" + unique_id).show(); 
+
+        if ($("#cont" + unique_id).length > 0) {
+            //setTimeout(function () { $(".highcharts-container").css("width", MaxWidthPX); }, 10);
+            //setTimeout(function () { $("#cont" + unique_id).css("width", MaxWidthPX); }, 10);
+            $(".highcharts-container").css("width", MaxWidthPX);
+            $("#cont" + unique_id).css("width", MaxWidthPX); 
+        }
+    }               
+    else if (action == 'enable') {
+
+        HideDateParams(unique_id, "show");
+
+        //setTimeout(function () { $("#busy_" + unique_id).hide(); }, 10);
+        $("#busy_" + unique_id).hide();
+
+        if (IsSingleItemDB == 1) {
+            if ($("#cont" + unique_id).length > 0) {
+
+//                setTimeout(function () { $(".highcharts-container").css("width", MaxWidthPX); }, 10);
+//                setTimeout(function () { $("#cont" + unique_id).css("width", MaxWidthPX); }, 10);
+                $(".highcharts-container").css("width", MaxWidthPX); 
+                $("#cont" + unique_id).css("width", MaxWidthPX); 
+
+
+
+                $("#dbitemchild_" + unique_id).show('fast', function () { });
+            }
+        } 
+        else {
+            if ($("#cont" + unique_id).length > 0) {
+                //setTimeout(function () { $(".highcharts-container").css("width", MaxWidthPX); }, 10);
+                //setTimeout(function () { $("#cont" + unique_id).css("width", MaxWidthPX); }, 10);
+                $(".highcharts-container").css("width", MaxWidthPX); 
+                $("#cont" + unique_id).css("width", MaxWidthPX); 
+
+            }
+        }
+
+        if ($(".highcharts-container").length > 0) {
+            //setTimeout(function () { $(".highcharts-container").css("width", MaxWidthPX); }, 10);
+            //setTimeout(function () { $("#cont" + unique_id).css("width", MaxWidthPX); }, 10);
+            $(".highcharts-container").css("width", MaxWidthPX);
+            $("#cont" + unique_id).css("width", MaxWidthPX);
+
+        }
+    }
+}
+
+function showPrint(uid, display) {
+    if (display == 0) {
+        $('#btnprint_' + uid).hide();
+    }
+    else {
+        $('#btnprint_' + uid).show();
+    }
+
+}
+
+function showBack(uid, display) {
+    if (display == 0) {
+        $('#btnBackdiv_' + uid).hide();
+    }
+    else {
+        $('#btnBackdiv_' + uid).show();
+    }
+}
+
+function showToolbar(uid, display) {
+    if (display == 0) {
+        $('#toolbar_' + uid).hide();
+    }
+    else {
+        $('#toolbar_' + uid).show();
+    }
+
+}
+
+
+function ReloadOpenDBItems()
+{
+    ToggleDashboardContextMenu("hide");
+    
+    $(".dbitem").each(
+        function (index, dbitem) {
+            var uniqueid = $(dbitem).attr("unique");
+            var dbitemchild = '#dbitemchild_' + uniqueid;
+            if ($(dbitemchild).is(':visible')) {
+                reloadDashboardItem2(currentDashboard, uniqueid);
+                HideFixedHeader();
+            } 
+        }
+	)
+}
+
+function LogIssueFirstOpenDBItem() {
+    ToggleDashboardContextMenu("hide");
+
+    $(".dbitem").each(
+        function (index, dbitem) {
+            var uniqueid = $(dbitem).attr("unique");
+            var dbitemchild = '#dbitemchild_' + uniqueid;
+            if ($(dbitemchild).is(':visible')) {
+                openSubmitReport(uniqueid);
+                return;
+            }
+        }
+	)
+}
+
+function GotoMicrosoftExcelInteractive() {
+    ToggleDashboardContextMenu("hide");
+
+    $(".dbitem").each(
+        function (index, dbitem) {
+            var uniqueid = $(dbitem).attr("unique");
+            var dbitemchild = '#dbitemchild_' + uniqueid;
+            if ($(dbitemchild).is(':visible')) {
+                var but = $("#MicrosoftExcelButton_" + uniqueid);
+                var c = "ee-buttonImg";
+                var iframe = $(but).find("iframe")[0]; // $("#MicrosoftExcelButton_" + uniqueid)
+                var iframe_button = $(iframe).contents().find(".ee-buttonImg")[0];
+                $(iframe_button).click();
+                //$(but).click();
+                return;
+            }
+        }
+	)
+}
+
+function ExportExcel_FirstOpenDBItem(reporttype) {
+    ToggleDashboardContextMenu("hide");
+
+    var rtype = "";
+
+    if (reporttype == 1) rtype = 'xls'
+    else if (reporttype == 2) rtype = 'xlsx'
+    else if (reporttype == 3) rtype = 'pdf'
+    else rtype = 'xlx'
+
+    $(".dbitem").each(
+        function (index, dbitem) {
+            var uniqueid = $(dbitem).attr("unique");
+            var dbitemchild = '#dbitemchild_' + uniqueid;
+            if ($(dbitemchild).is(':visible')) {
+
+                var tbl = "#tbl_" + uniqueid
+                var lbl = $("#lbl_" + uniqueid).text();
+                ReportExcel('Busy Generating Report', tbl, lbl, rtype);
+                return;
+            }
+        }
+	)
+}
+
+
+function ExportExcel2003_FirstOpenDBItem() {
+    ToggleDashboardContextMenu("hide");
+
+    $(".dbitem").each(
+        function (index, dbitem) {
+            var uniqueid = $(dbitem).attr("unique");
+            var dbitemchild = '#dbitemchild_' + uniqueid;
+            if ($(dbitemchild).is(':visible')) {
+
+                var tbl = "#tbl_" + uniqueid
+                var lbl = $("#lbl_" + uniqueid).text();
+                ReportExcel('Busy Generating Report', tbl, lbl, 'xls');
+            }
+        }
+	)
+}
+
+
+function ReloadAllDBItems() {
+
+    HideFixedHeader();
+    ToggleDashboardContextMenu("hide");
+    refreshDashboard(currentDashboard, true);
+}
+
+function currentDateTime() {
+    var d = new Date;
+    var dDay = d.getDate();
+    var dMonth = d.getMonth() + 1;
+    var dYear = d.getFullYear();
+    return dDay + "/" + dMonth + "/" + dYear + " " + d.toLocaleTimeString();
+
+}
+
+//  MTitus
+function currentDateTimeYMD_HMS() {
+    var d = new Date;
+    var dDay = d.getDate();
+    var dMonth = d.getMonth() + 1;
+    var dYear = d.getFullYear();
+
+    var dHours = d.getHours();
+    var dMinutes = d.getMinutes();
+    var dSeconds = d.getSeconds();
+
+    return dYear + "" + dMonth + "" + dDay + "" + dHours + "" + dMinutes + "" + dSeconds
+}
+
+function showTitle(uid, title) {
+    var cd = currentDateTime();
+    $('#lbl_' + uid).html(title);
+    $('#lbl_time' + uid).html("Generated: " + cd);
+
+//        $('#div_' + uid).css('background-color', 'transparent');
+//        $('#lbl_time' + uid).css('background-color', 'transparent');
+//        $('#lbl_' + uid).css('background-color', 'transparent');
+
+        $('.reporttitle-name').css('background-color', 'transparent');
+        $('.reporttitle-name-label').css('background-color', 'transparent');
+        $('.reporttitle-time').css('background-color', 'transparent');
+
+    }
+
+    function showMultiSelectParams(params) {
+        callAjax("/members/getMultiselectValues.ashx", params, function (data) {
+            $('#msModal').html(data);
+            $('#msModal').dialog('open');
+        });
+    
+    }
+
+    function showReportInfo(node, infoid, extrafield, icon,nodename) {
+
+        $(icon).attr('id', 'clickedInfo');
+        var w = $(window).width();
+        var h = $(window).height();
+        pt = $(icon).parents("tr");
+        var params = "infoid=" + infoid + "&node=" + node + "&extrafield=" + extrafield +"&nodename=" +nodename;
+        callAjax("/members/getReportInfo.ashx", params, function (data) {
+            $('#reportInfo').html(data);
+            $('#reportInfo').dialog('open');
+
+        });
+    }
+    function showSaveButton() {
+        if ($('#comments').val().length > 1) {
+            $('.btnreportInfo').show();
+        }
+        else {
+            $('.btnreportInfo').hide();
+        }
+    }
+
+//    function pauseResume() {
+//        if (!$('#cbautoUpdate').prop('checked') || $('#cbautoUpdate').prop('checked') == undefined) {
+//            $("#lblAutoUpdate").text("Auto Update OFF").addClass('ui-state-error');
+//            $.timerPool.pauseAll();
+//              }
+//        else {
+//            $("#lblAutoUpdate").text("Auto Update ON").removeClass('ui-state-error');
+//            $.timerPool.resumeAll();
+// 
+//        }
+//    }
+
+    function saveUserSettings() {
+        postAjax("/members/SaveUserSettings.ashx", "", function () {
+         });
+    }
+
+    function pauseResume2() {
+   
+        if (!$('#cbautoUpdate2').prop('checked') || $('#cbautoUpdate2').prop('checked') == undefined) {
+            $("#lblAutoUpdate2").text("Auto Update OFF").addClass('ui-state-error');
+            createCookie('autoUpdate', false, 1);
+            saveUserSettings();
+            $.timerPool.pauseAll();
+        }
+        else {
+            $("#lblAutoUpdate2").text("Auto Update ON").removeClass('ui-state-error');
+            createCookie('autoUpdate', true, 0);
+            saveUserSettings();
+            $.timerPool.resumeAll();
+        }
+    }
+
+
+
+    function showAllToggle() {
+        if (!$('#cbshowAll').prop('checked')) {
+            $("#lblcbshowAll").text("Show All OFF");
+            $('#lblcbshowAll').addClass('ui-state-error');
+            $('.dbitem.hide').hide();
+         }
+        else {
+            $("#lblcbshowAll").text("Show All ON");
+            $('#lblcbshowAll').removeClass('ui-state-error');
+            $('.dbitem.hide').show();
+        }
+
+//        var obj = $('#btnPauseResume');
+//        if (obj.text() == "Pause Updates") {
+//            obj.text("Resume Updates");
+//            $.timerPool.pauseAll();
+//        }
+//        else {
+//            obj.text("Pause Updates");
+//            $.timerPool.resumeAll();
+//                }
+    }
+
+    function ToggleCheckBoxCaption(checkbox, label, caption) {
+        
+        if (!$('#' + checkbox).prop('checked')) {
+            createCookie($('#' + checkbox)[0].name, false, 0)
+            saveUserSettings();
+            $('#' + label).text(caption + ' OFF');
+            $('#' + label).addClass('ui-state-error');
+          }
+        else {
+            $('#' + label).text(caption + ' ON');
+            createCookie($('#' + checkbox)[0].name, true, 0)
+            saveUserSettings();
+            $('#' + label).removeClass('ui-state-error');
+        }
+    }
+
+
+    function togglesideBar(forceclose) {
+        if (forceclose == undefined) { forceclose = false; }
+        if (forceclose == true) {sideBarOpen = true;}
+
+        if (sideBarOpen == false) {
+            //Create Title and content
+            var title = "";            
+            $(".paramcomplete", "#db_" + currentDashboard + "_params").each(function (indx, item) { title = title + item.innerText + "-"; });
+            if (title == "") { title = "Index-"; }
+            $("#sideBarTitle").text(title.substring(0,title.length -1));
+
+            var content = "";
+            $(".reporttitle", "#dashboard" + currentDashboard).each(function (index, item) {
+                content = content + "<div class='sideBarItem'><a href='#" +item.id + "'>" + item.innerText + "</a></div>";
+            });
+            $("#sideBarContent").html(content);
+
+            
+            $("#sideBar").switchClass("sideBarClosed", "sideBarOpen", 0);
+            $("#sideBarTitle").switchClass("sideBarTitleClosed", "sideBarTitleOpen", 0);
+            $("#sideBarContent").switchClass("sideBarContentClosed", "sideBarContentOpen", 0);
+            
+            sideBarOpen = true;
+        }
+        else {
+            $("#sideBar").switchClass("sideBarOpen", "sideBarClosed", 0);
+            $("#sideBarTitle").switchClass("sideBarTitleOpen", "sideBarTitleClosed", 0);
+            $("#sideBarContent").switchClass("sideBarContentOpen", "sideBarContentClosed", 0);
+            sideBarOpen = false;
+        }
+    }
+
+
+    function fixSize() { 
+        var x = $(window).width();
+        var y = $(window).height();
+    }
+
+    function updateDBParamHeader() {
+        var paramtext = "";
+        $(".paramcomplete", "#db_" + currentDashboard + "_params").each(function (indx, item) {
+            var lab =  $("label[for="+$(item).attr('id')+"]");
+            paramtext = paramtext + lab.text() + "-" + item.innerText + ",";
+        });
+        if (paramtext != "") {
+            var dbh = $("#dbParamsHeading_" + currentDashboard + '  *:last');
+            dbh.text("Dashboard Parameters: " + paramtext.substring(0, paramtext.length - 1));
+        }
+
+    }
+
+    function updateDBParamHeaderForCharts() {
+        var paramtext = "";
+
+        var list = $(".mw_title");
+        if (list.length > 0) {
+            paramtext = list[0].innerHTML;
+        }
+
+        if (paramtext != "") {
+            var dbh = $("#dbParamsHeading_" + 9999 + '  *:last');
+            dbh.text("Dashboard Parameters: " + paramtext.substring(0, paramtext.length - 1));
+        }
+
+        //$('.accordion').accordion('activate', false);
+        $('#db_' + 9999 + '_params').accordion('activate', false);
+
+    }
+	
+function refreshQuickDashboard(dbid, p) {
+        $(document).ready(function () {
+                  $('.dbitemX').each(function (index, dbitem) {
+                      postAjax("/members/Dashboard/dbLoadDashboardItem.ashx", "itemid=" + $(dbitem).attr("dashboarditem") + "&uniqueid=" + $(dbitem).attr("unique") + "&params=" + p + "&dasboardid=" + dbid + "&IsSingleItemDB=" + IsSingleItemDB, function (data) {
+                        $("#dbitemchild_" + $(dbitem).attr("unique")).html(data);
+                    });
+
+                });
+           
+            });
+            }
+
+
+            function showDashboardModal(dashboardid, parameters, header) {
+
+                createCookie("pDashboard", dashboardid);
+                createCookie("pParameters", parameters);
+                createCookie("pHeader", header);
+                w = window.open("quicklink.html", "_blank");
+           
+
+    }
+
+    function openSubmitReport(info) {
+        var all_info = "<info><uniqueid>" + info + "</uniqueid>" + currentParams + "</info>";
+        $('#dashboardinfo').val(all_info);
+        $('#submitReportMessage').val("");
+        $('#reportModal').dialog('open');
+        $('#charRemain').text("400 Characters remaining");
+        
+    }
+
+    function executeQuery(qry, isreturn, whattodo) {
+        postAjax("/members/GenericJSON.ashx", "qry=" + qry + "&isreturn=" + isreturn, whattodo);
+    }
+
+
+    (function ($) {
+
+        $.fn.idle = function (time) {
+            var o = $(this);
+
+
+            setTimeout(function () {
+                if (!o.hasClass('mouseon')) {
+                    o.hide()
+                }
+            }, time)
+
+        };
+    })(jQuery);
+
+
+    function reloadDashboardItem(dbid,item) {
+        $(document).ready(function () {
+
+            //$(“#example”).dataTable().fnDestroy();
+
+            var arrParams = $('.param', '#db_' + dbid + '_params');
+            var arrCount = $(".paramcomplete", '#db_' + dbid + '_params');
+            var runReport = 0;
+
+
+            p = "<params>";
+            $('.param', '#db_' + dbid + '_params').each(function (index, value) {
+                p = p + "<gaapparam><name>" + $(this).attr('name') + "</name><value>" + $(this).val() + "</value></gaapparam>";
+            });
+            p = p + "</params>";
+            currentParams = p;
+
+            dbitem = '#div_' + $(item).attr('unique');
+            postAjax("/members/Dashboard/dbLoadDashboardItem.ashx", "itemid=" + $(dbitem).attr("dashboarditem") + "&uniqueid=" + $(dbitem).attr("unique") + "&params=" + p + "&dasboardid=" + dbid + "&IsSingleItemDB=" + IsSingleItemDB, function (data) {
+                var unique_id = $(dbitem).attr("unique");           /* MFT NEW NAV  */
+                HideDateParams(unique_id, "hide");
+
+                $("#dbitemchild_" + unique_id).html(data);          /* MFT NEW NAV  changed */
+                AddExcelButton(unique_id);
+
+                Enable_Disable_DashboardItem(unique_id, 'disable');     /* MFT NEW NAV  */
+                $("#tbl_" + unique_id).on('xhr.dt', function () {       /* MFT NEW NAV  */
+
+                    //                    var excelInteractive = "<div id='divx_" + unique_id + "' style='width:100%; height:32px; position:relative; display:inline-block; float:left; clear:both;'>";
+                    //                    excelInteractive += "</div>";
+                    //                    $("#tbl_" + unique_id).before(excelInteractive);
+                    //                    $("#MicrosoftExcelButtonID").clone().appendTo($("#divx_" + unique_id));
+                    //                    $("#divx_" + unique_id).append("<table><tr><td>xxxxxxx</td></tr></table>");
+
+
+
+
+                    Enable_Disable_DashboardItem(unique_id, 'enable');  /* MFT NEW NAV  */
+
+                });
+            });
+
+            $('#btnPauseResume').text("Pause Updates");
+
+            ToggleDashboardsMenu("hide"); /* MFT NEW NAV  */
+        })
+
+    } 
+
+    function reloadDashboardItem2(dbid, uniqueid) {
+        $(document).ready(function () {
+              try
+              {
+                  $("#tbl_" + uniqueid).dataTable().fnDestroy();
+
+              }
+              catch(err)
+              {
+              }
+
+//          $("#btnreload_" + uniqueid).click();
+
+            var arrParams = $('.param', '#db_' + dbid + '_params');
+            var arrCount = $(".paramcomplete", '#db_' + dbid + '_params');
+            var runReport = 0;
+
+            p = "<params>";
+            $('.param', '#db_' + dbid + '_params').each(function (index, value) {
+                p = p + "<gaapparam><name>" + $(this).attr('name') + "</name><value>" + $(this).val() + "</value></gaapparam>";
+            });
+            p = p + "</params>";
+            currentParams = p;
+
+            dbitem = '#div_' + uniqueid;
+
+            postAjax("/members/Dashboard/dbLoadDashboardItem.ashx", "itemid=" + $(dbitem).attr("dashboarditem") + "&uniqueid=" + $(dbitem).attr("unique") + "&params=" + p + "&dasboardid=" + dbid + "&IsSingleItemDB=" + IsSingleItemDB, function (data) {
+                var unique_id = $(dbitem).attr("unique");           /* MFT NEW NAV  */
+                HideDateParams(unique_id, "hide");
+
+                $("#dbitemchild_" + unique_id).html(data);          /* MFT NEW NAV  changed */
+                Enable_Disable_DashboardItem(unique_id, 'disable');     /* MFT NEW NAV  */
+
+                $("#tbl_" + unique_id).on('xhr.dt', function () {       /* MFT NEW NAV  */
+                    HideDateParams(unique_id, "show");
+                    Enable_Disable_DashboardItem(unique_id, 'enable');  /* MFT NEW NAV  */
+
+                    if ($("#cont" + unique_id).length > 0) {
+                        //setTimeout(function () { $("#cont" + unique_id).css("width", "100%"); }, 10);
+                        $("#cont" + unique_id).css("width", "100%");
+                    }
+                });
+            });
+        })
+    }
+
+    function reloadQuickDashboardItem(dbid, item) {
+        $(document).ready(function () {
+            var arrParams = $('.param', '#db_' + dbid + '_params');
+            var arrCount = $(".paramcomplete", '#db_' + dbid + '_params');
+            var runReport = 0;
+
+            var p = $('#divparams').html();
+
+            dbitem = '#div_' + $(item).attr('unique');
+            postAjax("/members/Dashboard/dbLoadDashboardItem.ashx", "itemid=" + $(dbitem).attr("dashboarditem") + "&uniqueid=" + $(dbitem).attr("unique") + "&params=" + p + "&dasboardid=" + dbid + "&IsSingleItemDB=" + IsSingleItemDB, function (data) {
+                $("#dbitemchild_" + $(dbitem).attr("unique")).html(data);
+            });
+            $('#btnPauseResume').text("Pause Updates");
+
+        })
+
+    }
+
+
+	$.extend(true, $.fn.dataTable.defaults, {  "oLanguage": {
+ "sLengthMenu": "Show <select><option value=10>10</option><option value=25>25</option><option value=50>50</option><option value=100>100</option><option value=150>150</option><option value=-1 SELECTED>All</option></select> records" },
+"iDisplayLength": -1
+});
+
+function zoomDashboard(uniqueid) {
+    $('#zoomModal').html($(uniqueid).clone(true,true))
+    $('#zoomModal').dialog('open');
+}
+
+function fnFormatDetails(table, item) {
+    var thetable = table.dataTable();
+    var nTr = item.parentElement; //Should be TD
+    var row = thetable.fnGetPosition(nTr);
+    var aData = thetable.fnGetData(row[0]);
+    var sOut = '<table id="info_detail"><tr><td>Last Upload:</td><td>' + aData[4] + '</td><td>Last Heartbeat:</td><td>' + aData[5] + '</td><td>Last Sale:</td><td>' + aData[6] + '</td><td>Last Dayend:</td><td>' + aData[7] + '</td></tr></table>';
+    return sOut;
+}
+
+function clearModal(modal) {
+    var oTable = $('#tbl_reportinfo').dataTable();
+    oTable.fnDestroy();
+
+}
+
+function dt_ShowExtra(table, row, data, dataclass) {
+    var thetable = table.dataTable();
+    var nTr = $(row).parents('tr')[0]; 
+    if ( thetable.fnIsOpen(nTr) ) { row.src = '/styles/images/details_open.png'; thetable.fnClose(nTr); }
+    else { row.src = '/styles/images/details_close.png'; thetable.fnOpen( nTr, data,dataclass); }
+    }
+
+function GetQueryStringParams(sParam) {
+        
+        var sPageURL = window.location.search.substring(1);  
+        var sURLVariables = sPageURL.split('&');  
+        for (var i = 0; i < sURLVariables.length; i++)   
+        {  
+            var sParameterName = sURLVariables[i].split('=');  
+            if (sParameterName[0] == sParam)   
+            {  
+            return sParameterName[1];  
+            }  
+        } 
+       
+}
+
+
+function launchStoreDashboard(uid) {
+    window.open("http://web.gaap.co.za:1946/?uid=" + uid, "Dashboard",'height=' + screen.height-12 + ',width=' + screen.width + ',resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no');
+}
+
+function StoreLastScrollY() {
+    if ($('#MenuContainer99')[0] != undefined) {
+        var pos = $('#MenuContainer99')[0].scrollTop-50;
+        $("#dashboard_menubar").attr("menuscrollposition", pos);
+    }
+    else {
+        $("#dashboard_menubar").attr("menuscrollposition", 0);
+    }
+}
+
+function PositionTo_LastScrollY() {
+    if ($('#MenuContainer99')[0] != undefined) {
+        var pos = $("#dashboard_menubar").attr("menuscrollposition");
+        $('#MenuContainer99')[0].scrollTop = pos;
+    }
+}
+
+
+function ToggleDashboardsMenu(Action) {   /*  MFT NEW NAV  */
+
+    $('#dashboardmenulist').hide();
+    $('#DashboardContextArea').hide();
+    $('#headerX').hide();
+
+    if (Action == null || Action == "" || Action == "auto") {
+        $('#DashboardSelectArea').slideToggle(function () {
+            PositionTo_LastScrollY();
+            if ($('#DashboardSelectArea').is(":visible") == true) {
+                $('#DashboardSelectArea').focus();
+            }
+        });
+    }
+    else if (Action == "show") {
+    $('#DashboardSelectArea').slideDown("fast", function () {
+        $("#DashboardSelectArea").css("zoom", (GetIpadZoomAdjustFactor() * 100).toFixed(5) + "%");
+        PositionTo_LastScrollY();
+        $('#DashboardSelectArea').focus();
+    });
+    }
+    else if (Action == "hide") {
+        StoreLastScrollY();
+        $('#DashboardSelectArea').slideUp();
+    }
+
+    var current_db = $("#dashboardmenulist [aria-selected=true]").text(); //   ("id")
+    $('#dashboard_menubar')[0].value = "Select Dashboard"; //: [" + current_db + "]";
+}
+
+
+function ToggleDashboardContextMenu(Action) {
+
+    $('#DashboardSelectArea').hide();
+    $('#headerX').hide();
+
+    if (Action == null || Action == "" || Action == "auto") 
+    {
+        $('#DashboardContextArea').slideToggle();
+        if ($('#DashboardContextArea').is(":visible") == true) {
+            $('#DashboardContextArea').focus();
+        }
+    }
+    else if (Action == "show") {
+        $("#DashboardContextArea").css("zoom", (GetIpadZoomAdjustFactor() * 100).toFixed(5) + "%");
+        $('#DashboardContextArea').slideDown();
+        $('#DashboardContextArea').focus();
+    }
+    else if (Action == "hide") {
+        $('#DashboardContextArea').slideUp();
+    }
+}
+
+
+function ToggleParamsHeader(Action) {   /*  MFT NEW NAV  */
+    $('#DashboardContextArea').hide();
+    $('#DashboardSelectArea').hide();
+
+    if (Action == null || Action == "" || Action == "auto") {
+        $('#headerX').slideToggle();
+        if ($('#headerX').is(":visible") == true) {
+//            $('#headerX').focus();
+        }
+    }
+    else if (Action == "show") {
+        $('#headerX').slideDown();
+//        $('#headerX').focus();
+
+    }
+    else if (Action == "hide") {
+        $('#headerX').slideUp();
+    }
+}
+
+
+
+function HideShowDashboardItem(unique, item) {    /*  MFT NEW NAV  */
+    $(document).ready(function () {
+
+        if ($(".toolbar").length == 1) return;
+
+        //ZoomToActualWidth();
+
+        but_hideid = $(item).attr('id');
+        dbitem = '#dbitemchild_' + unique; // $(item).attr('unique');
+        var but_text = item.innerText;
+
+        if (readCookie('expandSingle') == 'true'){
+               $("[id^='dbitemchild_']").not($(dbitem)).slideUp();
+        }
+     
+
+        if ($(dbitem).is(':visible')) {
+            $(item).html("<span class='ui-button-text Expand'>Show</span>");
+        }
+        else {
+            $(item).html("<span class='ui-button-text Collapse'>Hide</span>");
+        }
+
+        $(dbitem).slideToggle("fast", function () { ZoomToActualWidth(); });
+
+        $(".reporttitle-grey").removeClass("ui-state-active");
+        $("#toolbar_" + unique).find('.reporttitle-grey:first').addClass("ui-state-active");
+
+
+        //setTimeout(function () {
+        ZoomFitToScreen();
+        //}, 500);
+
+    })
+
+}
+
+function IsAllDashBoardItemsCollapsed() {
+    var visibleCount = 0;
+
+    $("[id^='dbitemchild_']").each(function (index, el) {
+        var isVis = $(this).is(':visible');
+        if (isVis == true) {
+            visibleCount++;
+        }
+
+    });
+
+    if (visibleCount == 0)
+        return 1;
+    else
+        return 0;
+}
+
+function HideShowDashboardItem2(unique) {    /*  MFT NEW NAV  */
+
+    if ($(".toolbar").length == 1) {
+        $("#toolbar_" + unique).find('.reporttitle-grey:first').addClass("ui-state-active");
+        return;
+    }
+
+
+    $(document).ready(function () {
+
+        //ZoomToActualWidth();
+
+        dbitem = '#dbitemchild_' + unique; // $(item).attr('unique');
+
+        if ($('#optShowOneExpaned')[0] == undefined) {
+            $("[id^='dbitemchild_']").not($(dbitem)).slideUp();
+        }
+        else if ($('#optShowOneExpaned')[0].checked == true) {
+            $("[id^='dbitemchild_']").not($(dbitem)).slideUp();
+        }
+        $(dbitem).slideToggle("fast", function () { ZoomToActualWidth(); });
+
+
+        $(".reporttitle-grey").removeClass("ui-state-active");
+        $("#toolbar_" + unique).find('.reporttitle-grey:first').addClass("ui-state-active");
+
+        //setTimeout(function () {            ZoomFitToScreen();        }, 500);
+        ZoomFitToScreen();
+
+    })
+
+}
+
+function CollapseAllDashboardItems() {    /*  MFT NEW NAV  */
+    ToggleDashboardContextMenu("hide");
+
+    $(document).ready(function () {
+        $("[id^='dbitemchild_']").slideUp();
+
+    })
+
+}
+
+function ExpandAllDashboardItems() {    /*  MFT NEW NAV  */
+    ToggleDashboardContextMenu("hide");
+
+    $(document).ready(function () 
+    {
+
+        $("[id^='dbitemchild_']").slideDown();
+//        $("[id^='btnHide_']").html("<span class='ui-button-text Collapse'>Hide</span>");
+    })
+
+}
+
+function Buttonize_btnSubmitReports() {
+    $(document).ready(function () {
+    
+        $(".btnSubmitReport").button();
+
+})
+}
+
+
+function GetDashboard(dbid, dashboardname) {
+    var params_exist = paramsExist(dbid);
+    var params = "dashboardid=" + dbid + "&paramsexist=" + params_exist;  //+ "&dashboardname=" + dashboardname;
+
+    RemoveAllContent();
+    ZoomToActualWidth();
+
+    setDashboardID(dbid);
+    ToggleDashboardsMenu('hide');
+
+    callAjax("/members/dashboard/dbCreateParamsHeaderX.ashx", params, function (data) {
+
+        $('#headerX').show();
+
+        if (params_exist == 0) {
+            $('#headerX').show();
+            $('#headerX').html(data);
+			ToggleParamsHeader("show");
+        }
+        else {
+            $('#headerX').hide();
+            refreshDashboard(dbid, false);
+        }
+    });
+
+    callAjax("/members/dashboard/dbCreateDashboard.ashx", params, function (data) {
+
+        $('#dashboardmenulist').slideDown();
+        //$('#headerX').slideDown();
+
+        $('#content').show();
+        $('#content').html(data);
+
+        $('#dashboard_menubar')[0].value = "Select Dashboard"; //dashboardname;
+
+        if (params_exist == 1 || paramsCompleted(dbid) == 1) {
+            refreshDashboard(dbid, true);
+            $(".tablebar").css('height', '36px');
+        }
+        if (readCookie('expandSingle') == 'true') {
+            CollapseAllDashboardItems();
+        }
+    });
+}
+
+function GetDashboardItem(dbid, dbitemid, dashboardname) {
+
+    RemoveAllContent();
+    ZoomToActualWidth();
+
+    var params_exist = paramsExist(dbid);
+    var currentParamsHeader = "";
+
+    if (params_exist == 1) { currentParamsHeader = $('#headerX').html() }
+
+    var params = "dashboardid=" + dbid + "&dashboarditemid=" + dbitemid + "&paramsexist=" + params_exist;  //+ "&dashboardname=" + dashboardname;
+
+    setDashboardID(dbid);
+
+    ToggleDashboardsMenu('hide');
+
+    callAjax("/members/dashboard/dbCreateParamsHeaderX.ashx", params, function (data) {
+
+        if (params_exist == 0) {
+            $('#headerX').show();
+            $('#headerX').html(data);
+			ToggleParamsHeader("show");
+        }
+        else {
+            $('#headerX').hide();
+        }
+    });
+
+    callAjax("/members/dashboard/dbCreateDashboard.ashx", params, function (data) {
+
+        $('#dashboardmenulist').slideDown();
+
+        $('#content').show();
+
+        if (params_exist == 1) {
+
+            $('#content').html(data);
+
+            refreshDashboard(dbid, true);
+            $(".tablebar").css('height', '36px');
+
+        }
+        else {
+                $('#content').html(data);
+                if (paramsCompleted(dbid) == 1) {
+                    refreshDashboard(dbid, true);
+                    $(".tablebar").css('height', '36px');
+
+                }
+//                $('#content').html(data);
+        }
+
+        $('#dashboard_menubar')[0].value = "Select Dashboard"; // dashboardname;
+
+    });
+}
+
+
+function paramsExist(dbid) {
+	 //var paramsdiv = $('#db_' + dbid + '_params');
+    var paramsdiv = $('#dbParamsHeading_' + dbid).html();
+    
+    if (paramsdiv != undefined) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+function paramsCompleted(dbid) {
+    var arrParams = $('.param', '#db_' + dbid + '_params');
+    var arrCount = $(".paramcomplete", '#db_' + dbid + '_params');
+
+    if (arrParams.length == arrCount.length) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+function GetReportPage() {
+
+/*
+    var params = "dashboardid=" + dbid;
+    setDashboardID(dbid);
+    callAjax("/members/reportPage.ashx", params, function (data) {
+*/
+    $('#content').empty();
+    $('#content').children().remove();
+    HideFixedHeader();
+
+    $('#dashboardmenulist').slideDown();
+    ToggleDashboardsMenu();
+
+    callAjax("/members/reportPage.ashx", null, function (data) {
+        $('#content').show();
+        $('#content').html(data);
+
+        loadReportlist();
+
+    });
+}
+
+function GetMyMapPage() {
+    $('#content').empty();
+    $('#content').children().remove();
+    HideFixedHeader();
+
+    callAjax("/members/myMapPage.ashx", null, function (data) {
+        ToggleDashboardsMenu();
+
+        $('#dashboardmenulist').slideDown();
+
+        $('#content').show();
+        $('#content').html(data);
+
+        });
+
+}
+
+//function GetTrainingPage() {
+//    window.open("http://headmaster.htz.lessondesk.com/lessondesk/login/#");
+//}
+
+
+//========================================================================================================================
+// ZOOM  
+//========================================================================================================================
+
+function IS_IPAD() {
+    //alert(navigator.userAgent);
+
+    if (navigator.userAgent.toLowerCase().indexOf("ipad") > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+function IS_MSIE() {
+    if (navigator.userAgent.toLowerCase().indexOf("trident") > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+function IS_CHROME() {
+    if (navigator.userAgent.toLowerCase().indexOf("chrome/") > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+function AutoZoomFitToScreen_CHROME() {
+
+    $(document).ready(function () {
+
+        var CW = document.body.clientWidth;
+        var SW = document.body.scrollWidth;
+        var ZW = 0.00;
+
+        //SET THE FIT TO WIDTH BUTTON TOGGLE STATE
+        if (SW > CW) {
+            var diff = SW - CW;
+            ZW = (1 - (diff / SW)) * 100;
+
+            $(document.body).css("zoom", ZW + "%");
+
+            $(".heading").css("zoom", "100%");
+
+            $("#content").css("top", "38px")
+
+            //setTimeout(function () { $(".FixedHeader_Cloned").css("zoom", document.body.style.zoom); }, 10);
+            $(".FixedHeader_Cloned").css("zoom", document.body.style.zoom); 
+
+            $("#headingstatustext").removeClass("FitToWidth");
+            $("#headingstatustext").addClass("FitToActual");  //text("x %");
+
+            $("#content").css("top", "38px")
+        }
+        else {
+            ZW = 100;
+            $(document.body).css("zoom", "100%");
+            $(".heading").css("zoom", "100%");
+
+            $(".FixedHeader_Cloned").css("zoom", document.body.style.zoom);
+            //$(".datatable").css("zoom", document.body.style.zoom);
+
+            $("#headingstatustext").removeClass("FitToActual");  //text("100 %");
+            $("#headingstatustext").addClass("FitToWidth");
+        }
+
+        Resize_HeadingDiv_Chrome();
+
+    });
+}
+
+function AutoZoomFitToScreen_MSIE() {
+
+    $(document).ready(function () {
+
+        var CW = document.body.clientWidth;
+        var SW = document.body.scrollWidth;
+        var ZW = 0.00;
+
+        if (SW > CW) {
+            var diff = SW - CW;
+
+            ZW = (1 - (diff / SW)) * 100;
+            $(document.body).css("zoom", (ZW.toFixed(1) + "%"));
+            $(".FixedHeader_Cloned").css("zoom", (ZW.toFixed(1) + "%"));
+            $("#DashboardSelectArea").css("zoom", "100%");
+            $("#headingstatustext").removeClass("FitToWidth");
+            $("#headingstatustext").addClass("FitToActual");  //text("x %");
+            $("#content").css("top", "38px")
+        }
+        else 
+        {
+            ZW = 100.0;
+            $(document.body).css("zoom", "100%");
+            $(".FixedHeader_Cloned").css("zoom", "100%");
+            $("#headingstatustext").removeClass("FitToActual");  //text("100 %");
+            $("#headingstatustext").addClass("FitToWidth");
+
+//            //Forces heading to refesh with new zoom factor
+//            $(".dbitemchild").hide()
+//            $(".dbitemchild").get(0).offsetHeight;
+//            $(".dbitemchild").show()
+        }
+        
+    });
+
+}
+
+function GetIpadZoomAdjustFactor() {
+
+    var cw = document.body.clientWidth + 0.0001;
+    var iw = window.innerWidth + 0.0001;
+
+    var sZoomLevel = (cw / iw).toFixed(3);
+    var zoomLevel = (cw / iw);
+
+    var zoomadj = (2.0 - zoomLevel);
+
+    return zoomadj;
+}
+
+function AutoZoomFitToScreen_IPAD() {
+
+    $(document).ready(function () {
+
+        var CW = document.body.clientWidth;
+        var SW = document.body.scrollWidth;
+        var ZW = 0.00;
+        var ZF = GetIpadZoomAdjustFactor();
+        var ZF_Perc = 100;
+
+        //SET THE FIT TO WIDTH BUTTON TOGGLE STATE
+        if (SW > CW) {
+            var diff = SW - CW;
+            ZW = (1 - (diff / SW)) - 0.03;
+
+            setTimeout(function () { Set_Ipad_Viewport_InitialScale(ZW); }, 10);
+            //alert("ZoomWidth " + (ZW / 100).toFixed(3));
+
+            ZF = GetIpadZoomAdjustFactor();
+            ZF_Perc = (ZF * 100).toFixed(5) + "%";
+            //alert("ZoomAdjustFactor " + ZF.toFixed(3));
+
+            $("#DashboardSelectArea").css("zoom", ZF_Perc);
+            $("#DashboardContextArea").css("zoom", ZF_Perc);
+
+            //Forces heading to refesh with new zoom factor
+            $("#content").hide();
+            $("#content").get(0).offsetHeight;
+            $("#content").show();
+
+            //alert("body CW=" + CW + " , body SW=" + SW + " , ZoomToFit=" + ZW);
+            return;
+
+
+
+
+            //            $(document.body).css("zoom", ZW + "%");
+            //            //$("#headingstatustext").attr("ZoomPerc", ZW.toFixed(1) + " %");
+            //            $("#headingstatustext").removeClass("FitToWidth");
+            //            $("#headingstatustext").addClass("FitToActual");  //text("x %");
+        }
+        else {
+            ZW = 0.97;
+            Set_Ipad_Viewport_InitialScale(ZW);
+
+            ZF = GetIpadZoomAdjustFactor();
+            ZF_Perc = (ZF * 100).toFixed(5) + "%";
+            $("#DashboardSelectArea").css("zoom", ZF_Perc);
+            $("#DashboardContextArea").css("zoom", ZF_Perc);
+
+
+
+            //Forces heading to refesh with new zoom factor
+            $("#content").hide();
+            $("#content").get(0).offsetHeight;
+            $("#content").show();
+            return;
+
+
+            //            $(document.body).css("zoom", "100%");
+            //            //$("#headingstatustext").attr("ZoomPerc", "100 %");
+            //            $("#headingstatustext").removeClass("FitToActual");  //text("100 %");
+            //            $("#headingstatustext").addClass("FitToWidth");
+        }
+
+
+
+        //Resize_HeadingDiv_IPAD();
+
+
+    });
+}
+
+
+function GetZoomPercent_Horizontal() {
+    var cw = document.body.clientWidth;
+    var iw = window.innerWidth;
+
+    var sZoomLevel = (cw / iw).toFixed(3);
+    var zoomLevel = parseFloat(sZoomLevel);
+
+    return ((2.0 - zoomLevel) * 100).toFixed(3);
+}
+
+function GetZoomPercent_vertical() {
+    var ch = document.body.clientHeight;
+    var ih = window.innerHeight;
+
+    var sZoomLevel = (ch / ih).toFixed(3);
+    var zoomLevel = parseFloat(sZoomLevel);
+
+    return ((2.0 - zoomLevel) * 100).toFixed(3);
+}
+
+function Resize_HeadingDiv_IPAD() {
+    //return;
+
+    try {
+
+        if (IS_IPAD()) {
+
+            var zoomperc = GetZoomPercent_Horizontal();
+
+            var cw = document.body.clientWidth;
+            var iw = window.innerWidth;
+            var ch = document.body.clientHeight;
+            var ih = window.innerHeight;
+            var sZoomLevel = (cw / iw).toFixed(3);
+            var zoomLevel = parseFloat(sZoomLevel);
+            var sZoomLevelH = (ch / ih).toFixed(3);
+            var zoomLevelH = parseFloat(sZoomLevelH);
+
+            //=====================================================================================================================================
+            //var strSizeInfo = "W= " + $(window).width() + " , H= " + $(window).height() + ", zoom= " + sZoomLevel + "zoom %=" + zoomperc + "%";
+            //$("#headingstatustext").text(strSizeInfo);
+            var s_pgmzoom = $("body").css("zoom").toString();
+            s_pgmzoom = s_pgmzoom.replace('%', '');
+            var pgm_zoom = parseFloat(s_pgmzoom);
+            var headingPixelH = 35; //  $(".heading").innerHeight();
+
+            if ($(window).width() >= 980 && (pgm_zoom <= 0.97)) {
+                $(".heading").css("zoom", ((1 + pgm_zoom) * 100) + "%");
+                $(".FixedHeader_Cloned").css("zoom", ((1 + pgm_zoom) * 100) + "%");
+
+                var newTop = (headingPixelH * (1 + pgm_zoom));
+                $("#content").css("top", newTop + "px");
+
+                $(".FixedHeader_Cloned").css("top", newTop + "px"); 
+            }
+            else {
+                $(".heading").css("zoom", "100%");
+                $(".FixedHeader_Cloned").css("zoom", "100%");
+
+                var Top100Perc = (headingPixelH );
+                $("#content").css("top", Top100Perc + "px");
+
+                $(".FixedHeader_Cloned").css("top", newTop + "px"); 
+            }
+
+            //Forces heading to refesh with new zoom factor
+//            $('.heading').hide();
+//            $('.heading').get(0).offsetHeight; // no need to store this anywhere, the reference is enough
+//            $('.heading').show();
+        }
+    }
+    catch (err) {
+        //$("#headingstatustext").text(err);
+    }
+}
+
+function Resize_HeadingDiv_Chrome() {
+    //return;
+
+    try {
+
+        if (IS_CHROME()) {
+
+            var zoomperc = GetZoomPercent_Horizontal();
+
+            var cw = document.body.clientWidth;
+            var iw = window.innerWidth;
+            var ch = document.body.clientHeight;
+            var ih = window.innerHeight;
+            var sZoomLevel = (cw / iw).toFixed(3);
+            var zoomLevel = parseFloat(sZoomLevel);
+            var sZoomLevelH = (ch / ih).toFixed(3);
+            var zoomLevelH = parseFloat(sZoomLevelH);
+
+            //=====================================================================================================================================
+            //var strSizeInfo = "W= " + $(window).width() + " , H= " + $(window).height() + ", zoom= " + sZoomLevel + "zoom %=" + zoomperc + "%";
+            //$("#headingstatustext").text(strSizeInfo);
+            var s_pgmzoom = $("body").css("zoom").toString();
+            s_pgmzoom = s_pgmzoom.replace('%', '');
+            var pgm_zoom = parseFloat(s_pgmzoom);
+
+            if (pgm_zoom <= 0.99) {
+                //$(".heading").css("zoom", ((1 + pgm_zoom) * 100) + "%");
+                $(".heading").css("zoom", ((2-pgm_zoom)*100) + "%" );
+
+//                $(".FixedHeader_Cloned").css("zoom", ((1 + pgm_zoom) * 100) + "%");
+
+//                var headingPixelH = 35; //  $(".heading").innerHeight();
+//                var newTop = (headingPixelH * (1 + pgm_zoom));
+//                $("#content").css("top", newTop + "px");
+
+//                $(".FixedHeader_Cloned").css("top", newTop + "px");
+
+            }
+            else {
+                $(".heading").css("zoom", "100%");
+//                $(".FixedHeader_Cloned").css("zoom", "100%");
+
+//                var headingPixelH = 35;  //$(".heading").innerHeight();
+//                var Top100Perc = (headingPixelH);
+//                $("#content").css("top", Top100Perc + "px");
+
+//                $(".FixedHeader_Cloned").css("top", newTop + "px");
+            }
+
+            //Forces heading to refesh with new zoom factor
+            //            $('.heading').hide();
+            //            $('.heading').get(0).offsetHeight; // no need to store this anywhere, the reference is enough
+            //            $('.heading').show();
+        }
+    }
+    catch (err) {
+        //$("#headingstatustext").text(err);
+    }
+}
+function ZoomToActualWidth() {
+    $('#DashboardSelectArea').hide();
+    $('#DashboardContextArea').hide();
+    $('#dashboardmenulist').hide();
+    $('#headerX').hide();
+
+    $(document.body).css("zoom", "100%");
+
+    if (IS_IPAD() == 1) {
+        $(".FixedHeader_Cloned").css("zoom", "100%");
+    }
+
+    $("#headingstatustext").removeClass("FitToActual");  //text("100 %");
+    $("#headingstatustext").addClass("FitToWidth");
+    $(".heading").css("zoom", "100%");
+    var headingPixelH = 35;  //$(".heading").innerHeight();
+
+
+    if (IS_IPAD() == 1) {
+        var Top100Perc = (headingPixelH);
+        $("#content").css("top", Top100Perc + "px");
+        $(".FixedHeader_Cloned").css("top", newTop + "px");
+    }
+    else if (IS_CHROME() == 1) {
+        //$(".FixedHeader_Cloned").css("zoom", document.body.style.zoom);
+        $(".FixedHeader_Cloned").css("zoom", "100%");
+        $("#content").css("top", "34px")
+    }
+    else if (IS_MSIE() == 1) {
+        $("#content").css("top", "34px")
+    }
+
+    //Forces heading to refesh with new zoom factor
+    $("#content").hide();
+    $("#content").get(0).offsetHeight;
+    $("#content").show();
+
+
+}
+
+function ZoomFitToScreen() {
+    if (IS_IPAD() == 1) {
+        AutoZoomFitToScreen_IPAD();
+    }
+    else if (IS_MSIE() == 1) {
+        AutoZoomFitToScreen_MSIE();
+    }
+    else if (IS_CHROME() == 1) {
+        AutoZoomFitToScreen_CHROME();
+    }
+    else {
+        AutoZoomFitToScreen_MSIE();
+    }
+}
+
+function ZoomBackTo100() {
+
+    $('#DashboardSelectArea').hide();
+    $('#DashboardContextArea').hide();
+    $('#dashboardmenulist').hide();
+    $('#headerX').hide();
+
+    if ($(document.body)[0].style.zoom == "100%") {  //FIT TO WIDTH
+        if (IS_IPAD() == 1) {
+            AutoZoomFitToScreen_IPAD();
+        }
+        else if (IS_MSIE() == 1) {
+            AutoZoomFitToScreen_MSIE();
+        }
+        else if (IS_CHROME() == 1) {
+            AutoZoomFitToScreen_CHROME();
+        }
+        else {
+            AutoZoomFitToScreen_MSIE();
+        }
+    }
+    else    {    // BACK TO ACTUAL SCREEN SIZE
+
+        $(document.body).css("zoom", "100%");
+
+        if (IS_IPAD() == 1) {
+            $(".FixedHeader_Cloned").css("zoom", "100%");
+        }
+
+        $("#headingstatustext").removeClass("FitToActual");  //text("100 %");
+        $("#headingstatustext").addClass("FitToWidth");
+        $(".heading").css("zoom", "100%");
+        var headingPixelH = 35;  //$(".heading").innerHeight();
+
+
+        if (IS_IPAD() == 1) {
+            var Top100Perc = (headingPixelH);
+            $("#content").css("top", Top100Perc + "px");
+            $(".FixedHeader_Cloned").css("top", newTop + "px");
+        }
+        else if (IS_CHROME() == 1) {
+            //$(".FixedHeader_Cloned").css("zoom", document.body.style.zoom);
+            $(".FixedHeader_Cloned").css("zoom", "100%");
+            $("#content").css("top", "34px")
+        } 
+        else if (IS_MSIE() == 1) {
+            $("#content").css("top", "34px")
+        }
+
+        //Forces heading to refesh with new zoom factor
+        $("#content").hide();
+        $("#content").get(0).offsetHeight;
+        $("#content").show();
+    }
+
+}
+
+
+function Set_Ipad_Viewport_InitialScale(Value) {
+    if (navigator.userAgent.match(/iPad/i)) {
+        viewport = document.querySelector("meta[name=viewport]");
+//        viewport.setAttribute('content', 'width=1024'); //980
+
+//        viewport.setAttribute('minimum-scale', '0.25');
+        viewport.setAttribute('initial-scale', Value);
+//        viewport.setAttribute('maximum-scale', '0.5');
+        //alert(navigator.userAgent);
+    }
+    else if (navigator.userAgent.match(/trident/i)) {
+        //alert("Browser: " + navigator.userAgent);
+    }
+}
+function Datatable_Normal_Exists() {
+    var DT_Exists = 0;
+    $(".dataTable").each(function () 
+    {
+        var sID = $(this).attr('id');
+        if (sID != undefined) {
+            DT_Exists = 1; return false;
+        }
+    });
+    return DT_Exists;
+}
+
+function RemoveAllContent() {
+
+    $("#content").html("");
+
+}
+function InitializeScreen() {
+
+    eraseCookie("userid");
+    eraseCookie("username");
+    eraseCookie("userexport");
+    eraseCookie("usertype"); /* MFT NEW NAV  */
+    eraseCookie("friendlyname"); /* MFT NEW NAV  */
+    eraseCookie(".ASPXAUTH"); /* MFT NEW NAV  */
+
+    $("#content").children().remove(); /* MFT NEW NAV  */
+    $("#DashboardSelectArea").children().remove(); /* MFT NEW NAV  */
+    $("#DashboardContextArea").children().remove(); /* MFT NEW NAV  */
+    $("#headerX").children().remove(); /* MFT NEW NAV  */
+    $("#reportlistdiv").children().remove(); /* MFT NEW NAV  */
+
+//    $("#content").html(""); /* MFT NEW NAV  */
+//    $("#DashboardSelectArea").html(""); /* MFT NEW NAV  */
+//    $("#DashboardContextArea").html(""); /* MFT NEW NAV  */
+//    $("#headerX").html(""); /* MFT NEW NAV  */
+//    $("#reportlistdiv").html(""); /* MFT NEW NAV  */
+
+    $("#content").empty(); /* MFT NEW NAV  */
+    $("#DashboardSelectArea").empty(); /* MFT NEW NAV  */
+    $("#DashboardContextArea").empty(); /* MFT NEW NAV  */
+    $("#headerX").empty(); /* MFT NEW NAV  */
+    $("#reportlistdiv").empty(); /* MFT NEW NAV  */
+
+    sessionStorage.clear(); /* MFT NEW NAV  */
+
+}
+
+
+function HideDuplicateExportMenu(highchart_contid) {
+    var highchart_cont = $("#" + highchart_contid);
+    var ctr = 0;
+
+    $(highchart_cont).find(".highcharts-button").each
+    (
+        function () {
+            ctr = ctr + 1;
+            if (ctr >= 2) {
+                $(this).remove();
+            }
+        }
+    )
+} 
+
+
+function HideDateParams(unique_id, action) {
+    if (action == 'hide') {
+
+        var rep_title = $("#toolbar_" + unique_id).find('.reporttitle-grey:first');
+
+        $(rep_title).find(".reporttitle-DateParamLabel").each(function () 
+        {
+            $(this).hide();
+        });
+    }
+    else if (action == 'show') {
+        var rep_title = $("#toolbar_" + unique_id).find('.reporttitle-grey:first');
+
+        $(rep_title).find(".reporttitle-DateParamLabel").each(function () {
+            
+            var datevalue = $(this).find(".DateLabels:first").text();
+            
+            if (datevalue.length >= 4) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+    }
+
+}
+
+
+$(window).resize(function () {
+    var wWidth = $(window).width();
+    var dWidth = wWidth * 0.4;
+    var wHeight = $(window).height();
+    var dHeight = wHeight * 0.95;
+
+    $("#dialogdrill").dialog("option", "width", dWidth);
+    $("#dialogdrill").dialog("option", "height", dHeight);
+    $("#dialogdrill").dialog("option",
+    "position", {
+        my: "center", at:
+        "center", of: window
+    });
+
+
+}).resize();
+
+
+function UserProfile() {
+
+    $("#content").hide();
+    $("#heading").hide();
+
+    var wWidth = $(window).width();
+    var dWidth = wWidth * 0.4;
+    var wHeight = $(window).height();
+    var dHeight = wHeight * 0.95;
+
+
+    $("#dialogdrill").dialog({
+        width: dWidth,
+        height: dHeight,
+        resizable: false,
+        modal: true,
+        closeOnEscape: false,
+        open: function (ev, ui) {
+            $("#DashboardSelectArea").hide();
+            $('#heading').hide();
+            $("#DashboardContextArea").slideUp();
+            $('#dialogdrill').css('overflow', 'hidden');
+            $('#myIframe').attr('src', 'user_maintain.html');
+            $('#myIframe').css('overflow', 'hidden');
+            $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+            $("#mw_buttonbarcustom_").show();
+            $("#mw_buttonokcustom_").show();
+            $("#mw_buttoncancelcustom_").show();
+
+        },
+        close: function () {
+            $("#DashboardSelectArea").show();
+            $('#heading').show();
+            $("#content").show();
+
+        }
+
+    })
+
+
+    $(document).ready(function () {
+        $("#mw_buttoncancelcustom_").click(function () { closedetails(); });
+        $("#mw_buttonokcustom_").click(function () { savedetails(); });
+    });
+
+
+};

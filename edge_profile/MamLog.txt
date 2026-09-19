@@ -1,0 +1,444 @@
+[2026-09-17T14:51:50.976Z] [INFO] ========================================================================================================================
+[2026-09-17T14:51:50.977Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T14:51:50.977Z] [INFO] Telemetry session 1a02916c-7de6-4a5d-a4d1-cb180d8fa608.
+[2026-09-17T14:51:50.978Z] [INFO] Initializing cache (v1).
+[2026-09-17T14:51:50.991Z] [INFO] Registered UserID:a33a8592-54df-4c84-8f14-3f97f1717691 in the Azure public cloud.
+[2026-09-17T14:51:50.991Z] [INFO] Conditional Access is blocked for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 pre-enrollment; compliance reporting will be accelerated to unblock the user.
+[2026-09-17T14:51:50.991Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T14:51:50.991Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:51:53.251Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:51:53.862Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:dbe08663-9392-47e7-8fb1-6fa74913adf6)
+[2026-09-17T14:51:53.866Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T14:51:53.867Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T14:51:54.862Z.
+[2026-09-17T14:53:08.084Z] [INFO] Shutting down.
+[2026-09-17T14:53:08.084Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T14:53:08.085Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T14:53:08.087Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T14:56:47.338Z] [INFO] ========================================================================================================================
+[2026-09-17T14:56:47.338Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T14:56:47.338Z] [INFO] Telemetry session 368e1ea3-379d-42f3-8d1d-f45a8b3f7b67.
+[2026-09-17T14:56:47.338Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T14:56:47.338Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T14:56:47.339Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:56:47.339Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:56:47.339Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T14:56:47.354Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T14:56:47.354Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:56:47.354Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T14:56:53.088Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T14:56:53.702Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:6f5f98f5-12fd-4b7e-9ced-3065b81625d0)
+[2026-09-17T14:56:53.703Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T14:56:53.703Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T14:56:54.702Z.
+[2026-09-17T14:57:47.117Z] [INFO] Shutting down.
+[2026-09-17T14:57:47.119Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T14:57:47.119Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T14:57:47.122Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:03:39.420Z] [INFO] ========================================================================================================================
+[2026-09-17T15:03:39.420Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:03:39.421Z] [INFO] Telemetry session ebdb1ed1-f728-4fd4-995f-ccbea6601232.
+[2026-09-17T15:03:39.421Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:03:39.421Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:03:39.421Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:03:39.422Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:03:39.422Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:03:39.455Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:03:39.455Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:03:39.455Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:03:45.224Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:03:45.788Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:1524d313-86c3-4c34-8a3e-c7cbd08ca5d3)
+[2026-09-17T15:03:45.789Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:03:45.789Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:03:46.788Z.
+[2026-09-17T15:05:53.408Z] [INFO] Shutting down.
+[2026-09-17T15:05:53.409Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:05:53.409Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:05:53.409Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:10:50.701Z] [INFO] ========================================================================================================================
+[2026-09-17T15:10:50.701Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:10:50.701Z] [INFO] Telemetry session 5b3fd22f-f2df-4e6d-a8f1-b62ac90dbf75.
+[2026-09-17T15:10:50.702Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:10:50.702Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:10:50.702Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:10:50.702Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:10:50.702Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:10:50.761Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:10:50.761Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:10:50.761Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:10:56.424Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:10:57.057Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:fed6eae1-7470-4a75-89c2-2d34f5353ed7)
+[2026-09-17T15:10:57.059Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:10:57.059Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:10:58.057Z.
+[2026-09-17T15:11:08.490Z] [INFO] Shutting down.
+[2026-09-17T15:11:08.491Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:11:08.491Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:11:08.491Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:13:12.566Z] [INFO] ========================================================================================================================
+[2026-09-17T15:13:12.566Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:13:12.566Z] [INFO] Telemetry session 46bd0ed7-637c-4159-95ed-e7dc9be4fb65.
+[2026-09-17T15:13:12.566Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:13:12.566Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:13:12.567Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:13:12.567Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:13:12.567Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:13:12.590Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:13:12.590Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:13:12.590Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:13:18.490Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:13:19.149Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:36d8b29b-ba2d-417a-b5f2-4a817f82da5c)
+[2026-09-17T15:13:19.150Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:13:19.151Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:13:20.149Z.
+[2026-09-17T15:15:55.248Z] [INFO] Shutting down.
+[2026-09-17T15:15:55.248Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:15:55.248Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:15:55.249Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:25:03.628Z] [INFO] ========================================================================================================================
+[2026-09-17T15:25:03.628Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:25:03.629Z] [INFO] Telemetry session f7fa12f0-fdf2-4831-863d-657f915d32ef.
+[2026-09-17T15:25:03.629Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:25:03.629Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:25:03.629Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:25:03.630Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:25:03.630Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:25:03.645Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:25:03.645Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:25:03.645Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:25:09.337Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:25:10.568Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:0e231f48-f129-4981-a90e-7578653e1d23)
+[2026-09-17T15:25:10.569Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:25:10.569Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:25:11.568Z.
+[2026-09-17T15:26:21.146Z] [INFO] Shutting down.
+[2026-09-17T15:26:21.150Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:26:21.154Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:26:21.156Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:37:29.954Z] [INFO] ========================================================================================================================
+[2026-09-17T15:37:29.954Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:37:29.955Z] [INFO] Telemetry session 1fc88030-351c-4274-a4c6-ff1941c4f974.
+[2026-09-17T15:37:29.955Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:37:29.955Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:37:29.955Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:37:29.956Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:37:29.956Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:37:29.993Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:37:29.993Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:37:29.993Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:37:35.851Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:37:36.471Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:5385429c-7cb1-44df-b9f7-c6c561b4416c)
+[2026-09-17T15:37:36.472Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:37:36.472Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:37:37.471Z.
+[2026-09-17T15:38:31.306Z] [INFO] Shutting down.
+[2026-09-17T15:38:31.307Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:38:31.307Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:38:31.307Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T15:42:05.463Z] [INFO] ========================================================================================================================
+[2026-09-17T15:42:05.463Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T15:42:05.463Z] [INFO] Telemetry session 2e11cff9-f1da-486d-bb22-dc64083a3712.
+[2026-09-17T15:42:05.463Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T15:42:05.463Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T15:42:05.464Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:42:05.464Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:42:05.464Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T15:42:05.486Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T15:42:05.487Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:42:05.487Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T15:42:11.250Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T15:42:11.975Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:8bbdac5b-5174-4dd9-ba26-c3637c5e0259)
+[2026-09-17T15:42:11.976Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T15:42:11.976Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T15:42:12.975Z.
+[2026-09-17T15:43:31.562Z] [INFO] Shutting down.
+[2026-09-17T15:43:31.610Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T15:43:31.610Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T15:43:31.610Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T16:31:21.355Z] [INFO] ========================================================================================================================
+[2026-09-17T16:31:21.355Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T16:31:21.355Z] [INFO] Telemetry session a0f8c7de-62c8-42a2-88aa-0b3e95364146.
+[2026-09-17T16:31:21.356Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T16:31:21.356Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T16:31:21.356Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:31:21.357Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:31:21.357Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T16:31:21.391Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T16:31:21.391Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:31:21.391Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T16:31:27.622Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:31:28.274Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:b726e9f7-6521-462c-9e7a-b67755445cc1)
+[2026-09-17T16:31:28.275Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T16:31:28.275Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T16:31:29.274Z.
+[2026-09-17T16:32:14.781Z] [INFO] Shutting down.
+[2026-09-17T16:32:14.792Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T16:32:14.794Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T16:32:14.795Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T16:40:45.192Z] [INFO] ========================================================================================================================
+[2026-09-17T16:40:45.192Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T16:40:45.192Z] [INFO] Telemetry session 97f0807b-86d6-4f97-a006-9662d6fc3d78.
+[2026-09-17T16:40:45.193Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T16:40:45.193Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T16:40:45.193Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:40:45.194Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:40:45.194Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T16:40:45.214Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T16:40:45.214Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:40:45.215Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T16:40:51.038Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:40:51.748Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:ca131294-312a-48f8-838e-29639789a0a3)
+[2026-09-17T16:40:51.749Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T16:40:51.749Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T16:40:52.748Z.
+[2026-09-17T16:43:45.602Z] [INFO] Shutting down.
+[2026-09-17T16:43:45.605Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T16:43:45.605Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T16:43:45.607Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T16:46:23.613Z] [INFO] ========================================================================================================================
+[2026-09-17T16:46:23.613Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T16:46:23.613Z] [INFO] Telemetry session 9b936359-a9e2-407d-aa81-e0809d001ab3.
+[2026-09-17T16:46:23.614Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T16:46:23.614Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T16:46:23.614Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:46:23.614Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:46:23.614Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T16:46:23.649Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T16:46:23.649Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:46:23.650Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T16:46:29.402Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T16:46:30.054Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:10a8dd9b-a81a-4802-805f-96c437252fe1)
+[2026-09-17T16:46:30.055Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T16:46:30.055Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T16:46:31.054Z.
+[2026-09-17T16:48:28.506Z] [INFO] Shutting down.
+[2026-09-17T16:48:28.507Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T16:48:28.507Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T16:48:28.508Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T18:14:49.346Z] [INFO] ========================================================================================================================
+[2026-09-17T18:14:49.347Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T18:14:49.347Z] [INFO] Telemetry session 6f61de3c-18e6-4b35-bb70-57d4a31ca8e1.
+[2026-09-17T18:14:49.347Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T18:14:49.347Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T18:14:49.348Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:14:49.348Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:14:49.348Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T18:14:49.370Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T18:14:49.370Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:14:49.370Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T18:14:55.745Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:14:56.367Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:4a09a614-6d30-4483-b09e-ae6f970d35e7)
+[2026-09-17T18:14:56.368Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T18:14:56.368Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T18:14:57.367Z.
+[2026-09-17T18:16:49.725Z] [INFO] Shutting down.
+[2026-09-17T18:16:49.727Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T18:16:49.729Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T18:16:49.731Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T18:25:02.626Z] [INFO] ========================================================================================================================
+[2026-09-17T18:25:02.626Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T18:25:02.626Z] [INFO] Telemetry session d6c33852-20c4-42f3-8354-46f4119d8282.
+[2026-09-17T18:25:02.627Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T18:25:02.627Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T18:25:02.627Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:25:02.627Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:25:02.627Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T18:25:02.642Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T18:25:02.642Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:25:02.642Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T18:25:08.318Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:25:08.971Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:23361976-9023-4d0d-814b-fd9a0be38a6a)
+[2026-09-17T18:25:08.972Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T18:25:08.972Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T18:25:09.971Z.
+[2026-09-17T18:26:13.439Z] [INFO] Shutting down.
+[2026-09-17T18:26:13.440Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T18:26:13.440Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T18:26:13.440Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T18:29:45.434Z] [INFO] ========================================================================================================================
+[2026-09-17T18:29:45.435Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T18:29:45.435Z] [INFO] Telemetry session a3c1e100-402d-418e-bdfb-00e70d20a6ab.
+[2026-09-17T18:29:45.437Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T18:29:45.437Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T18:29:45.437Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:29:45.437Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:29:45.437Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T18:29:45.481Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T18:29:45.482Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:29:45.482Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T18:29:51.187Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:29:52.007Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:07fead63-ffd9-4d25-91ba-35258808e285)
+[2026-09-17T18:29:52.008Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T18:29:52.008Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T18:29:53.007Z.
+[2026-09-17T18:34:07.766Z] [INFO] Shutting down.
+[2026-09-17T18:34:07.766Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T18:34:07.766Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T18:34:07.767Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2026-09-17T18:35:19.210Z] [INFO] ========================================================================================================================
+[2026-09-17T18:35:19.210Z] [INFO] Initializing MAM Client.
+App: com.microsoft.edge 153.0.4234.32
+SDK: 2.1.367.0
+OS: windows 10.0.28000.1575
+DeviceType: Desktop
+Manufacturer: HP
+Model: HP EliteBook 840 G3
+Telemetry: yes
+Managed device support: enabled
+[2026-09-17T18:35:19.210Z] [INFO] Telemetry session 1422aaa3-3a91-4c55-ba6b-a702afd9f02a.
+[2026-09-17T18:35:19.210Z] [INFO] Restored UserID:a33a8592-54df-4c84-8f14-3f97f1717691
+Azure public cloud
+[2026-09-17T18:35:19.210Z] [INFO] Reinitialized cache (v1).
+[2026-09-17T18:35:19.211Z] [INFO] Scheduler background thread starting for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:35:19.218Z] [INFO] Re-queuing pre-enrollment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:35:19.218Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run as soon as possible.
+[2026-09-17T18:35:19.228Z] [ERROR] The application could not supply an access token on request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+Reason: 0
+User not found: token fetch aborted.
+[2026-09-17T18:35:19.228Z] [WARNING] Unable to acquire an access token during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:35:19.229Z] [ERROR] An unexpected error occurred during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted after a brief delay on local conditions.
+[2026-09-17T18:35:24.979Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:a33a8592-54df-4c84-8f14-3f97f1717691.
+[2026-09-17T18:35:25.832Z] [ERROR] MAM Location Service request for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:c9b75e91-0ea5-4835-af6c-a54888a508f3)
+[2026-09-17T18:35:25.833Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:a33a8592-54df-4c84-8f14-3f97f1717691; the operation will be reattempted at a later time.
+[2026-09-17T18:35:25.833Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 to run at 2026-09-18T18:35:26.832Z.
+[2026-09-17T18:37:29.459Z] [INFO] Shutting down.
+[2026-09-17T18:37:29.461Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2026-09-17T18:37:29.462Z] [INFO] Scheduler background thread for UserID:a33a8592-54df-4c84-8f14-3f97f1717691 is exiting after completing the last task.
+[2026-09-17T18:37:29.463Z] [INFO] Task scheduler has stopped, and all work has been canceled.
